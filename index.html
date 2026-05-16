@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Dr. Sarah Mitchell, MD — Psychiatry & Medication Management</title>
+  <meta name="description" content="Board-certified psychiatrist offering compassionate, evidence-based care for adults and adolescents. In-person and telehealth visits." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" />
+  <link rel="stylesheet" href="styles.css?v=1" />
+</head>
+<body>
+  <a class="skip" href="#contact">Skip to contact</a>
+
+  <header class="topbar">
+    <a class="brand" href="/">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 32 32" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M16 28c6.627 0 12-5.373 12-12 0-2.5-.8-4.8-2.1-6.7C24.5 7 21 4 16 4S7.5 7 6.1 9.3C4.8 11.2 4 13.5 4 16c0 6.627 5.373 12 12 12z"/>
+          <path d="M11 14c0 2.5 2 5 5 5s5-2.5 5-5"/>
+          <circle cx="12" cy="13" r="1" fill="currentColor"/>
+          <circle cx="20" cy="13" r="1" fill="currentColor"/>
+        </svg>
+      </span>
+      <span class="brand-text">
+        <strong>Dr. Sarah Mitchell</strong>
+        <em>MD · Psychiatry</em>
+      </span>
+    </a>
+
+    <nav class="nav" aria-label="Primary">
+      <a href="#about">About</a>
+      <a href="#services">Services</a>
+      <a href="#insurance">Insurance</a>
+      <a href="#contact">Contact</a>
+    </nav>
+
+    <div class="topbar-cta">
+      <a class="btn btn-primary" href="booking.html">Schedule appointment</a>
+    </div>
+
+    <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
+      <span></span><span></span><span></span>
+    </button>
+  </header>
+
+  <div class="mobile-menu" id="mobile-menu" hidden>
+    <a href="#about">About</a>
+    <a href="#services">Services</a>
+    <a href="#insurance">Insurance</a>
+    <a href="#contact">Contact</a>
+    <a class="btn btn-primary" href="booking.html">Schedule appointment</a>
+  </div>
+
+  <!-- HERO -->
+  <section class="hero">
+    <img class="hero-photo" src="https://images.unsplash.com/photo-1518495973542-4542c06a5843?w=2000&q=80&auto=format&fit=crop" alt="" />
+    <div class="hero-overlay"></div>
+    <div class="grain" aria-hidden="true"></div>
+    <div class="breath-circle" aria-hidden="true"></div>
+    <div class="hero-inner">
+      <p class="eyebrow">Board-certified psychiatry · Established 2014</p>
+      <h1>Thoughtful psychiatric care, <span class="accent">at your pace.</span></h1>
+      <p class="hero-sub">Evidence-based treatment for depression, anxiety, ADHD, and more — for adults and adolescents. In-person visits in downtown Portland or telehealth across Oregon.</p>
+      <div class="hero-ctas">
+        <a class="btn btn-primary btn-lg" href="booking.html">Schedule an appointment</a>
+        <a class="btn btn-ghost btn-lg" href="#about">Meet Dr. Mitchell</a>
+      </div>
+      <ul class="hero-pills" aria-label="At a glance">
+        <li><span aria-hidden="true">●</span> Accepting new patients</li>
+        <li><span aria-hidden="true">●</span> In-person & telehealth</li>
+        <li><span aria-hidden="true">●</span> Most major insurance</li>
+      </ul>
+    </div>
+
+    <a class="scroll-cue" href="#about" aria-label="Scroll to about section">
+      <span>Scroll</span>
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </a>
+  </section>
+
+  <!-- TICKER -->
+  <div class="ticker" aria-hidden="true">
+    <div class="ticker-track">
+      <span>
+        Board-certified · ABPN <em class="sep">✦</em>
+        10+ years in practice <em class="sep">✦</em>
+        Adults &amp; adolescents 14+ <em class="sep">✦</em>
+        In-person &amp; telehealth <em class="sep">✦</em>
+        Most major insurance accepted <em class="sep">✦</em>
+        Accepting new patients <em class="sep">✦</em>
+      </span>
+      <span>
+        Board-certified · ABPN <em class="sep">✦</em>
+        10+ years in practice <em class="sep">✦</em>
+        Adults &amp; adolescents 14+ <em class="sep">✦</em>
+        In-person &amp; telehealth <em class="sep">✦</em>
+        Most major insurance accepted <em class="sep">✦</em>
+        Accepting new patients <em class="sep">✦</em>
+      </span>
+    </div>
+  </div>
+
+  <!-- ABOUT -->
+  <section class="section" id="about">
+    <div class="wrap about-grid">
+      <figure class="about-photo reveal">
+        <img src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=900&q=80&auto=format&fit=crop" alt="Dr. Sarah Mitchell" />
+      </figure>
+      <div class="about-copy reveal">
+        <p class="kicker">About Dr. Mitchell</p>
+        <h2>Care that treats the whole person — not just the diagnosis.</h2>
+        <p>Dr. Sarah Mitchell is a board-certified psychiatrist with over a decade of experience helping patients navigate mood disorders, anxiety, ADHD, and life transitions. Her practice is built around collaborative, evidence-based treatment plans that respect each patient's goals, values, and life context.</p>
+        <p>She believes that good psychiatric care is a conversation, not a prescription pad — and that every patient deserves a clinician who actually listens.</p>
+
+        <div class="creds">
+          <div>
+            <p class="cred-label">Training</p>
+            <p class="cred-value">MD, Johns Hopkins School of Medicine</p>
+            <p class="cred-value">Residency, UCSF Department of Psychiatry</p>
+          </div>
+          <div>
+            <p class="cred-label">Certifications</p>
+            <p class="cred-value">Board-certified, ABPN</p>
+            <p class="cred-value">Licensed in Oregon &amp; Washington</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SERVICES -->
+  <section class="section section-alt" id="services">
+    <div class="wrap">
+      <div class="ornament" aria-hidden="true"><span class="dot"></span></div>
+      <header class="section-head reveal">
+        <p class="kicker">What I treat</p>
+        <h2>Services &amp; areas of focus</h2>
+        <p class="lead">A focused practice serving adults and adolescents (14+). Visits combine careful medication management with brief, supportive psychotherapy.</p>
+      </header>
+
+      <div class="svc-grid reveal-grid">
+        <article class="svc-card">
+          <div class="svc-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          </div>
+          <h3>Depression</h3>
+          <p>Major depressive disorder, persistent depressive disorder, postpartum, and treatment-resistant depression.</p>
+        </article>
+
+        <article class="svc-card">
+          <div class="svc-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+          </div>
+          <h3>Anxiety disorders</h3>
+          <p>Generalized anxiety, panic, social anxiety, and specific phobias. Both pharmacologic and behavioral approaches.</p>
+        </article>
+
+        <article class="svc-card">
+          <div class="svc-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8z"/></svg>
+          </div>
+          <h3>ADHD</h3>
+          <p>Comprehensive evaluation and ongoing management for adolescents and adults newly seeking diagnosis or transferring care.</p>
+        </article>
+
+        <article class="svc-card">
+          <div class="svc-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12c2-6 8-6 9 0s7 6 9 0"/></svg>
+          </div>
+          <h3>Bipolar disorder</h3>
+          <p>Long-term mood stabilization with careful monitoring and patient-centered planning around life events.</p>
+        </article>
+
+        <article class="svc-card">
+          <div class="svc-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s-8-5-8-12a5 5 0 0 1 9-3 5 5 0 0 1 9 3c0 7-8 12-10 12z"/></svg>
+          </div>
+          <h3>PTSD &amp; trauma</h3>
+          <p>Trauma-informed evaluation and pharmacologic support, coordinated with your therapist if you have one.</p>
+        </article>
+
+        <article class="svc-card">
+          <div class="svc-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h6M9 16h6M9 8h6M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/></svg>
+          </div>
+          <h3>Medication management</h3>
+          <p>Initial assessment, titration, side-effect monitoring, and ongoing follow-up — typically every 1–3 months.</p>
+        </article>
+
+        <article class="svc-card">
+          <div class="svc-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="m9 22 3-4 3 4M2 18h20"/></svg>
+          </div>
+          <h3>Telehealth visits</h3>
+          <p>Secure video appointments available statewide in Oregon and Washington for established patients.</p>
+        </article>
+
+        <article class="svc-card">
+          <div class="svc-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="4"/><path d="M3 21v-1a6 6 0 0 1 12 0v1M17 11a4 4 0 0 0 0-8M23 21v-1a6 6 0 0 0-4-5.65"/></svg>
+          </div>
+          <h3>Adolescent psychiatry</h3>
+          <p>Care for patients ages 14–18, with family involvement when appropriate. Coordinated with schools and pediatricians.</p>
+        </article>
+
+        <article class="svc-card">
+          <div class="svc-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3-9 4 18 3-9h4"/></svg>
+          </div>
+          <h3>Second opinions</h3>
+          <p>If you're unsure about a current treatment plan, I offer one-time consultations to review and advise.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- SPOTLIGHT / philosophy -->
+  <section class="spotlight">
+    <img class="spotlight-photo" src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=2000&q=80&auto=format&fit=crop" alt="" />
+    <div class="spotlight-overlay"></div>
+    <div class="grain" aria-hidden="true"></div>
+    <div class="spotlight-inner">
+      <p class="eyebrow">My approach</p>
+      <blockquote>
+        <p>"My job isn't to hand you a label — it's to understand what's actually going on in your life and figure out, together, the smallest change that helps the most."</p>
+        <footer>— Dr. Sarah Mitchell, MD</footer>
+      </blockquote>
+    </div>
+  </section>
+
+  <!-- INSURANCE -->
+  <section class="section" id="insurance">
+    <div class="wrap">
+      <div class="ornament" aria-hidden="true"><span class="dot"></span></div>
+      <header class="section-head reveal">
+        <p class="kicker">Insurance &amp; payment</p>
+        <h2>Most major insurance plans accepted</h2>
+        <p class="lead">If you don't see your plan listed, please reach out — we can often verify benefits or work with you on a self-pay arrangement.</p>
+      </header>
+
+      <ul class="ins-grid reveal-grid" aria-label="Accepted insurance">
+        <li class="ins-card"><span>Blue Cross<br/>Blue Shield</span></li>
+        <li class="ins-card"><span>Aetna</span></li>
+        <li class="ins-card"><span>Cigna</span></li>
+        <li class="ins-card"><span>UnitedHealthcare</span></li>
+        <li class="ins-card"><span>Kaiser<br/>Permanente</span></li>
+        <li class="ins-card"><span>Providence<br/>Health Plan</span></li>
+        <li class="ins-card"><span>Moda<br/>Health</span></li>
+        <li class="ins-card"><span>Self-pay<br/>welcome</span></li>
+      </ul>
+
+      <p class="ins-note">Sliding-scale availability is limited but reviewed case by case. Please mention financial concerns when you contact the office.</p>
+    </div>
+  </section>
+
+  <!-- CONTACT / form -->
+  <section class="section section-alt" id="contact">
+    <div class="wrap">
+      <div class="ornament" aria-hidden="true"><span class="dot"></span></div>
+    </div>
+    <div class="wrap contact-grid">
+      <div class="contact-copy reveal">
+        <p class="kicker">Get in touch</p>
+        <h2>Send a message — or book directly.</h2>
+        <p>Use the form for general questions, insurance verification, or to ask whether we're the right fit. For scheduling, the calendar tool is the fastest way to lock in a time.</p>
+
+        <a class="btn btn-primary btn-lg" href="booking.html">Open the booking calendar →</a>
+
+        <ul class="contact-list">
+          <li>
+            <span class="ci">Phone</span>
+            <a href="tel:+15035550142">(503) 555-0142</a>
+          </li>
+          <li>
+            <span class="ci">Email</span>
+            <a href="mailto:office@drmitchell.example">office@drmitchell.example</a>
+          </li>
+          <li>
+            <span class="ci">Office</span>
+            <span>1208 SW Morrison St, Suite 410<br/>Portland, OR 97205</span>
+          </li>
+          <li>
+            <span class="ci">Hours</span>
+            <span>Mon–Thu 9:00am – 5:00pm<br/>Fri 9:00am – 1:00pm</span>
+          </li>
+        </ul>
+      </div>
+
+      <form class="contact-form reveal" id="contact-form" novalidate>
+        <h3>Send a message</h3>
+
+        <div class="field">
+          <label for="cf-name">Full name</label>
+          <input id="cf-name" name="name" type="text" required maxlength="80" autocomplete="name" />
+          <small class="error" data-for="name"></small>
+        </div>
+
+        <div class="row-2">
+          <div class="field">
+            <label for="cf-email">Email</label>
+            <input id="cf-email" name="email" type="email" required maxlength="120" autocomplete="email" />
+            <small class="error" data-for="email"></small>
+          </div>
+          <div class="field">
+            <label for="cf-phone">Phone</label>
+            <input id="cf-phone" name="phone" type="tel" maxlength="20" autocomplete="tel" placeholder="(555) 555-5555" />
+            <small class="error" data-for="phone"></small>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="cf-reason">What can I help with?</label>
+          <select id="cf-reason" name="reason">
+            <option>New patient — schedule consultation</option>
+            <option>Existing patient — question for the office</option>
+            <option>Insurance / billing question</option>
+            <option>Second opinion / one-time consult</option>
+            <option>Other</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="cf-msg">Message <span class="muted">(optional)</span></label>
+          <textarea id="cf-msg" name="message" maxlength="800" rows="4" placeholder="Briefly, what's going on? You don't need to share clinical details here."></textarea>
+          <div class="count"><span id="cf-count">0</span> / 800</div>
+        </div>
+
+        <!-- honeypot -->
+        <input type="text" name="website" tabindex="-1" autocomplete="off" class="hp" aria-hidden="true" />
+
+        <button type="submit" class="btn btn-primary btn-lg">Send message</button>
+        <p class="form-note">Not for emergencies. If you're in crisis, call <strong>988</strong> (Suicide &amp; Crisis Lifeline) or go to your nearest ER.</p>
+      </form>
+
+      <div class="form-success" id="form-success" hidden>
+        <div class="success-mark" aria-hidden="true">✓</div>
+        <h3>Message sent</h3>
+        <p>Thanks for reaching out. The office typically responds within one business day.</p>
+        <button type="button" class="btn btn-ghost" id="send-another">Send another message</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="wrap footer-grid">
+      <div>
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 32 32" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M16 28c6.627 0 12-5.373 12-12 0-2.5-.8-4.8-2.1-6.7C24.5 7 21 4 16 4S7.5 7 6.1 9.3C4.8 11.2 4 13.5 4 16c0 6.627 5.373 12 12 12z"/>
+              <path d="M11 14c0 2.5 2 5 5 5s5-2.5 5-5"/>
+            </svg>
+          </span>
+          <span class="brand-text"><strong>Dr. Sarah Mitchell</strong><em>MD · Psychiatry</em></span>
+        </div>
+        <p class="muted small">Compassionate, evidence-based psychiatric care for adults and adolescents in Portland, OR.</p>
+      </div>
+
+      <div>
+        <p class="foot-h">Visit</p>
+        <p class="muted small">1208 SW Morrison St, Suite 410<br/>Portland, OR 97205</p>
+        <p class="muted small"><a href="tel:+15035550142">(503) 555-0142</a><br/><a href="mailto:office@drmitchell.example">office@drmitchell.example</a></p>
+      </div>
+
+      <div>
+        <p class="foot-h">Notice</p>
+        <p class="muted small">This website is for informational purposes only and does not constitute medical advice. No patient-provider relationship is established by sending a message. In an emergency, dial 911 or 988.</p>
+      </div>
+    </div>
+    <div class="footer-base">
+      <p class="muted small">© <span id="yr"></span> Sarah Mitchell, MD, PC. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="script.js?v=1" defer></script>
+</body>
+</html>
