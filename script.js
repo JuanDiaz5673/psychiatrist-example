@@ -129,16 +129,42 @@
     });
   }
 
-  // insurance "view more" toggle
+  // insurance "view more" toggle — dynamic visible count based on column count
   const insToggle = document.getElementById('ins-toggle');
-  const insExtras = document.getElementById('ins-extras');
-  if (insToggle && insExtras) {
-    const hiddenCount = insExtras.querySelectorAll('.ins-card').length;
+  const insGrid = document.getElementById('ins-grid');
+  if (insToggle && insGrid) {
+    const total = insGrid.querySelectorAll('.ins-card').length;
     const label = insToggle.querySelector('.ins-toggle-label');
+
+    const columnCount = () => {
+      const cs = window.getComputedStyle(insGrid);
+      return cs.gridTemplateColumns.split(' ').filter(Boolean).length || 1;
+    };
+    const visibleCount = () => columnCount() * 2;
+
+    const sync = () => {
+      const expanded = insGrid.classList.contains('is-expanded');
+      const hidden = Math.max(0, total - visibleCount());
+      if (hidden === 0) {
+        insToggle.style.display = 'none';
+        return;
+      }
+      insToggle.style.display = '';
+      label.textContent = expanded ? 'Show fewer plans' : `View ${hidden} more plans`;
+    };
+
     insToggle.addEventListener('click', () => {
-      const open = insExtras.classList.toggle('is-open');
-      insToggle.setAttribute('aria-expanded', String(open));
-      label.textContent = open ? 'Show fewer plans' : `View ${hiddenCount} more plans`;
+      const expanded = insGrid.classList.toggle('is-expanded');
+      insToggle.setAttribute('aria-expanded', String(expanded));
+      sync();
     });
+
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(sync, 120);
+    });
+
+    sync();
   }
 })();

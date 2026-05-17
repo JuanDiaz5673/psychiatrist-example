@@ -532,22 +532,33 @@ h3 { font-size: 1.2rem; font-weight: 600; }
 .ins-note {
   text-align: center; color: var(--text-3); font-size: .9rem;
 }
-@media (max-width: 760px) { .ins-grid { grid-template-columns: repeat(2, 1fr); } }
 
-.ins-extras-wrap {
-  overflow: hidden;
-  max-height: 0;
-  opacity: 0;
-  transition: max-height .5s var(--ease), opacity .35s ease, margin-top .4s var(--ease);
-  margin-top: 0;
+/* responsive column counts */
+@media (max-width: 920px) { .ins-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 600px) { .ins-grid { grid-template-columns: repeat(2, 1fr); } }
+
+/* dynamic visible count — always fills full rows for the current breakpoint */
+/* desktop 4 cols → show 8 (2 rows) */
+.ins-grid > li:nth-child(n+9) { display: none; }
+/* tablet 3 cols → show 6 (2 rows) */
+@media (max-width: 920px) {
+  .ins-grid > li { display: grid; }
+  .ins-grid > li:nth-child(n+7) { display: none; }
 }
-.ins-extras-wrap[hidden] { display: block; }
-.ins-extras-wrap.is-open {
-  max-height: 900px;
-  opacity: 1;
-  margin-top: 14px;
+/* mobile 2 cols → show 4 (2 rows) */
+@media (max-width: 600px) {
+  .ins-grid > li { display: grid; }
+  .ins-grid > li:nth-child(n+5) { display: none; }
 }
-.ins-extras-grid { margin: 0; }
+/* expanded: all cards visible regardless of breakpoint */
+.ins-grid.is-expanded > li {
+  display: grid !important;
+  animation: insFadeIn .4s var(--ease) both;
+}
+@keyframes insFadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 
 .ins-toggle-wrap {
   margin: 20px 0 8px;
