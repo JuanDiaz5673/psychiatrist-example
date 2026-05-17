@@ -19,7 +19,7 @@
     '13:00', '13:30', '14:00', '14:30', '15:00', '15:30', '16:00', '16:30'
   ];
 
-  // deterministic pseudo-random based on date — same date always returns same slots.
+  // deterministic pseudo-random based on date: same date always returns same slots.
   const slotsForDate = (d) => {
     const dow = d.getDay();
     if (dow === 0 || dow === 6) return []; // closed weekends
@@ -91,10 +91,10 @@
       } else if (!hasSlots) {
         btn.classList.add('no-slots');
         btn.disabled = true;
-        btn.setAttribute('aria-label', `${date.toDateString()} — no availability`);
+        btn.setAttribute('aria-label', `${date.toDateString()}, no availability`);
       } else {
         btn.classList.add('has-slots');
-        btn.setAttribute('aria-label', `${date.toDateString()} — ${slots.length} times available`);
+        btn.setAttribute('aria-label', `${date.toDateString()}, ${slots.length} times available`);
         btn.addEventListener('click', () => selectDate(date));
       }
 

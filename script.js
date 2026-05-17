@@ -129,7 +129,7 @@
     });
   }
 
-  // insurance "view more" toggle — dynamic visible count based on column count
+  // insurance "view more" toggle: dynamic visible count based on column count
   const insToggle = document.getElementById('ins-toggle');
   const insGrid = document.getElementById('ins-grid');
   if (insToggle && insGrid) {

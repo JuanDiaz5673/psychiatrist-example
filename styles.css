@@ -537,7 +537,7 @@ h3 { font-size: 1.2rem; font-weight: 600; }
 @media (max-width: 920px) { .ins-grid { grid-template-columns: repeat(3, 1fr); } }
 @media (max-width: 600px) { .ins-grid { grid-template-columns: repeat(2, 1fr); } }
 
-/* dynamic visible count — always fills full rows for the current breakpoint */
+/* dynamic visible count: always fills full rows for the current breakpoint */
 /* desktop 4 cols → show 8 (2 rows) */
 .ins-grid > li:nth-child(n+9) { display: none; }
 /* tablet 3 cols → show 6 (2 rows) */
