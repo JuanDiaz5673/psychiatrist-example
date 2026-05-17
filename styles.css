@@ -534,33 +534,23 @@ h3 { font-size: 1.2rem; font-weight: 600; }
 }
 @media (max-width: 760px) { .ins-grid { grid-template-columns: repeat(2, 1fr); } }
 
-.ins-extra {
-  max-height: 0;
-  padding-top: 0; padding-bottom: 0;
-  min-height: 0;
-  border-width: 0;
-  opacity: 0;
+.ins-extras-wrap {
   overflow: hidden;
-  pointer-events: none;
-  transition: max-height .45s var(--ease),
-              opacity .25s ease,
-              padding .35s var(--ease),
-              border-width .2s ease,
-              transform .35s var(--ease);
-  transform: translateY(-6px);
+  max-height: 0;
+  opacity: 0;
+  transition: max-height .5s var(--ease), opacity .35s ease, margin-top .4s var(--ease);
+  margin-top: 0;
 }
-.ins-grid.is-expanded .ins-extra {
-  max-height: 160px;
-  min-height: 110px;
-  padding: 18px;
-  border-width: 1px;
+.ins-extras-wrap[hidden] { display: block; }
+.ins-extras-wrap.is-open {
+  max-height: 900px;
   opacity: 1;
-  pointer-events: auto;
-  transform: translateY(0);
+  margin-top: 14px;
 }
+.ins-extras-grid { margin: 0; }
 
 .ins-toggle-wrap {
-  margin: 28px 0 12px;
+  margin: 20px 0 8px;
   text-align: center;
 }
 .ins-toggle {

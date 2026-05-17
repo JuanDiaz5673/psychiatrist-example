@@ -131,14 +131,14 @@
 
   // insurance "view more" toggle
   const insToggle = document.getElementById('ins-toggle');
-  const insGrid = document.getElementById('ins-grid');
-  if (insToggle && insGrid) {
-    const hiddenCount = insGrid.querySelectorAll('.ins-extra').length;
+  const insExtras = document.getElementById('ins-extras');
+  if (insToggle && insExtras) {
+    const hiddenCount = insExtras.querySelectorAll('.ins-card').length;
     const label = insToggle.querySelector('.ins-toggle-label');
     insToggle.addEventListener('click', () => {
-      const expanded = insGrid.classList.toggle('is-expanded');
-      insToggle.setAttribute('aria-expanded', String(expanded));
-      label.textContent = expanded ? 'Show fewer plans' : `View ${hiddenCount} more plans`;
+      const open = insExtras.classList.toggle('is-open');
+      insToggle.setAttribute('aria-expanded', String(open));
+      label.textContent = open ? 'Show fewer plans' : `View ${hiddenCount} more plans`;
     });
   }
 })();
