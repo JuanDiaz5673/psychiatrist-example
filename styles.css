@@ -22,7 +22,7 @@
 }
 
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; overflow-x: hidden; }
 body {
   margin: 0;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
@@ -30,6 +30,7 @@ body {
   background: var(--bg);
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
 /* shared brand selection + focus */
@@ -269,6 +270,31 @@ h3 { font-size: 1.2rem; font-weight: 600; }
   color: rgba(255,255,255,.92);
 }
 .hero-pills span { color: #87d3c5; margin-right: 6px; }
+
+/* ---------- waitlist notice banner ---------- */
+.notice {
+  background: #fff8ec;
+  border-top: 1px solid #f1e1bf;
+  border-bottom: 1px solid #f1e1bf;
+  color: #6b5328;
+}
+.notice-inner {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 24px;
+  font-size: .92rem;
+}
+.notice-inner p { margin: 0; line-height: 1.45; }
+.notice-inner strong { color: #4a3a1c; }
+.notice-dot {
+  width: 10px; height: 10px; flex-shrink: 0;
+  border-radius: 50%; background: #d99e3a;
+  box-shadow: 0 0 0 4px rgba(217, 158, 58, .18);
+  animation: noticePulse 2.6s ease-in-out infinite;
+}
+@keyframes noticePulse {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(217, 158, 58, .18); }
+  50%      { box-shadow: 0 0 0 8px rgba(217, 158, 58, .05); }
+}
 
 /* ---------- marquee ticker ---------- */
 .ticker {

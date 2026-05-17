@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Schedule an appointment — Dr. Sarah Mitchell, MD</title>
-  <meta name="description" content="Pick a date and time that works for you. New patients welcome." />
+  <title>Request an appointment — Saudia J. Rahim, MHC</title>
+  <meta name="description" content="Request a session time — Saudia J. Rahim, MHC. Currently maintaining a waitlist for new clients." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" />
-  <link rel="stylesheet" href="styles.css?v=1" />
+  <link rel="stylesheet" href="styles.css?v=2" />
 </head>
 <body>
   <a class="skip" href="#cal-panel">Skip to calendar</a>
@@ -24,14 +24,15 @@
         </svg>
       </span>
       <span class="brand-text">
-        <strong>Dr. Sarah Mitchell</strong>
-        <em>MD · Psychiatry</em>
+        <strong>Saudia J. Rahim</strong>
+        <em>MHC · LP</em>
       </span>
     </a>
 
     <nav class="nav" aria-label="Primary">
       <a href="index.html#about">About</a>
-      <a href="index.html#services">Services</a>
+      <a href="index.html#services">Specialties</a>
+      <a href="index.html#approach">Approach</a>
       <a href="index.html#insurance">Insurance</a>
       <a href="index.html#contact">Contact</a>
     </nav>
@@ -42,10 +43,17 @@
   </header>
 
   <main class="booking-wrap">
+    <div class="notice" role="status" style="margin: -48px -24px 32px; border-radius: 0;">
+      <div class="wrap notice-inner">
+        <span class="notice-dot" aria-hidden="true"></span>
+        <p><strong>Currently not accepting new clients.</strong> You're welcome to submit a request and we'll reach out when openings come up.</p>
+      </div>
+    </div>
+
     <div class="booking-head">
-      <p class="kicker">Schedule an appointment</p>
+      <p class="kicker">Request an appointment</p>
       <h1>Find a time that works for you.</h1>
-      <p>Pick a date with availability, then choose from the open time slots. You'll confirm your details on the next step. New patient visits are 60 minutes; follow-ups are 30 minutes.</p>
+      <p>Pick a preferred date, then choose a time. You'll confirm your details on the next step. Individual sessions are 50 minutes.</p>
     </div>
 
     <ol class="steps" aria-label="Steps">
@@ -120,18 +128,18 @@
               <small class="error" data-for="phone"></small>
             </div>
             <div class="field">
-              <label for="b-type">Visit type</label>
+              <label for="b-type">Session type</label>
               <select id="b-type" name="type">
-                <option>New patient consultation (60 min)</option>
-                <option>Established patient follow-up (30 min)</option>
-                <option>Second-opinion consultation (45 min)</option>
+                <option>Initial consultation (50 min)</option>
+                <option>Returning client — individual session (50 min)</option>
+                <option>Parent / family consult (50 min)</option>
               </select>
             </div>
             <div class="field">
-              <label for="b-format">Visit format</label>
+              <label for="b-format">Format</label>
               <select id="b-format" name="format">
-                <option>In-person (Portland office)</option>
-                <option>Telehealth (Oregon &amp; Washington)</option>
+                <option>In-person (Valley Stream, NY)</option>
+                <option>Telehealth (New York residents)</option>
               </select>
             </div>
             <div class="field field-full">
@@ -174,7 +182,7 @@
 
   <footer class="footer">
     <div class="wrap footer-base">
-      <p class="muted small">© <span id="yr"></span> Sarah Mitchell, MD, PC. All rights reserved.</p>
+      <p class="muted small">© <span id="yr"></span> Saudia J. Rahim, MHC. All rights reserved.</p>
     </div>
   </footer>
 
