@@ -20,23 +20,26 @@
     revealers.forEach(el => io.observe(el));
   }
 
-  // mobile menu
+  // mobile menu (dropdown)
   const ham = document.getElementById('hamburger');
   const menu = document.getElementById('mobile-menu');
   if (ham && menu) {
     const close = () => {
       menu.hidden = true;
       ham.setAttribute('aria-expanded', 'false');
-      document.body.style.overflow = '';
     };
-    ham.addEventListener('click', () => {
+    ham.addEventListener('click', (e) => {
+      e.stopPropagation();
       const open = menu.hidden;
       menu.hidden = !open;
       ham.setAttribute('aria-expanded', String(open));
-      document.body.style.overflow = open ? 'hidden' : '';
     });
     menu.addEventListener('click', (e) => {
       if (e.target.tagName === 'A') close();
+      else e.stopPropagation();
+    });
+    document.addEventListener('click', () => {
+      if (!menu.hidden) close();
     });
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && !menu.hidden) close();
