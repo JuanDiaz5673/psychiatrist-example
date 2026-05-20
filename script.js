@@ -3,6 +3,20 @@
   const yr = document.getElementById('yr');
   if (yr) yr.textContent = new Date().getFullYear();
 
+  // sticky top bar — toggle elevated state once the user scrolls past ~8px
+  const topbar = document.querySelector('.topbar');
+  if (topbar) {
+    const sync = () => topbar.classList.toggle('is-scrolled', window.scrollY > 8);
+    let ticking = false;
+    window.addEventListener('scroll', () => {
+      if (!ticking) {
+        requestAnimationFrame(() => { sync(); ticking = false; });
+        ticking = true;
+      }
+    }, { passive: true });
+    sync();
+  }
+
   // scroll-reveal
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const revealers = document.querySelectorAll('.reveal, .reveal-grid');

@@ -27,7 +27,9 @@
 }
 
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; overflow-x: hidden; }
+/* `overflow-x: clip` prevents horizontal scroll without creating a scroll
+   container, so `position: sticky` on .topbar continues to work. */
+html { scroll-behavior: smooth; overflow-x: clip; }
 body {
   margin: 0;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
@@ -35,7 +37,7 @@ body {
   background: var(--bg);
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 /* shared brand selection + focus */
@@ -92,9 +94,22 @@ h3 { font-size: 1.2rem; font-weight: 600; }
   position: sticky; top: 0; z-index: 100;
   display: flex; align-items: center; gap: 20px;
   padding: 12px 24px;
-  background: rgba(255,255,255,.85);
-  backdrop-filter: saturate(150%) blur(12px);
-  border-bottom: 1px solid var(--border);
+  background: rgba(255,255,255,.7);
+  backdrop-filter: saturate(160%) blur(14px);
+  -webkit-backdrop-filter: saturate(160%) blur(14px);
+  border-bottom: 1px solid transparent;
+  transition:
+    background .25s ease,
+    border-color .25s ease,
+    box-shadow .25s ease,
+    padding .25s ease;
+}
+.topbar.is-scrolled {
+  background: rgba(255,255,255,.92);
+  border-bottom-color: var(--border);
+  box-shadow: 0 8px 24px -16px rgba(30, 20, 50, .25);
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
 .brand { display: flex; align-items: center; gap: 12px; color: var(--text); text-decoration: none; }
 .brand:hover { text-decoration: none; }

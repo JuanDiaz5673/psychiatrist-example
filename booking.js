@@ -7,6 +7,20 @@
   const yr = document.getElementById('yr');
   if (yr) yr.textContent = new Date().getFullYear();
 
+  // ---------- sticky top bar elevation ----------
+  const topbar = document.querySelector('.topbar');
+  if (topbar) {
+    const syncTopbar = () => topbar.classList.toggle('is-scrolled', window.scrollY > 8);
+    let topbarTicking = false;
+    window.addEventListener('scroll', () => {
+      if (!topbarTicking) {
+        requestAnimationFrame(() => { syncTopbar(); topbarTicking = false; });
+        topbarTicking = true;
+      }
+    }, { passive: true });
+    syncTopbar();
+  }
+
   // ---------- timezone ----------
   const tz = (() => {
     try { return Intl.DateTimeFormat().resolvedOptions().timeZone; }
