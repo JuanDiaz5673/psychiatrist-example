@@ -8,7 +8,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" />
-  <link rel="stylesheet" href="styles.css?v=2" />
+  <link rel="stylesheet" href="styles.css?v=3" />
+  <!-- preload hero LCP image (responsive) -->
+  <link rel="preload" as="image" type="image/avif"
+        href="images/wisteria-hero-1280.avif"
+        imagesrcset="images/wisteria-hero-768.avif 768w, images/wisteria-hero-1280.avif 1280w, images/wisteria-hero-1920.avif 1920w"
+        imagesizes="100vw" fetchpriority="high" />
 </head>
 <body>
   <a class="skip" href="#contact">Skip to contact</a>
@@ -49,7 +54,15 @@
 
   <!-- HERO -->
   <section class="hero">
-    <img class="hero-photo" src="images/wisteria-hero.jpg" alt="" />
+    <picture>
+      <source type="image/avif"
+              srcset="images/wisteria-hero-768.avif 768w, images/wisteria-hero-1280.avif 1280w, images/wisteria-hero-1920.avif 1920w"
+              sizes="100vw" />
+      <source type="image/webp"
+              srcset="images/wisteria-hero-768.webp 768w, images/wisteria-hero-1280.webp 1280w, images/wisteria-hero-1920.webp 1920w"
+              sizes="100vw" />
+      <img class="hero-photo" src="images/wisteria-hero-1280.jpg" alt=""
+           fetchpriority="high" decoding="async" /></picture>
     <div class="hero-overlay"></div>
     <div class="grain" aria-hidden="true"></div>
     <div class="hero-inner">
@@ -252,7 +265,14 @@
 
   <!-- SPOTLIGHT / philosophy -->
   <section class="spotlight">
-    <img class="spotlight-photo" src="images/wisteria-approach.jpg" alt="" />
+    <picture>
+      <source type="image/avif"
+              srcset="images/wisteria-approach-768.avif 768w, images/wisteria-approach.jpg 1240w"
+              sizes="100vw" />
+      <source type="image/webp"
+              srcset="images/wisteria-approach-768.webp 768w, images/wisteria-approach.jpg 1240w"
+              sizes="100vw" />
+      <img class="spotlight-photo" src="images/wisteria-approach.jpg" alt="" loading="lazy" decoding="async" /></picture>
     <div class="spotlight-overlay"></div>
     <div class="grain" aria-hidden="true"></div>
     <div class="spotlight-inner">
