@@ -200,6 +200,8 @@ h3 { font-size: 1.2rem; font-weight: 600; }
   padding: 10px 14px;
   font-size: .95rem;
 }
+.mobile-menu .btn-primary,
+.mobile-menu .btn-primary:hover { color: #fff; }
 @keyframes menuDrop {
   from { opacity: 0; transform: scale(.96) translateY(-6px); }
   to   { opacity: 1; transform: scale(1) translateY(0); }
