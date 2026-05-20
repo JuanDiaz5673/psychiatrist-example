@@ -399,6 +399,26 @@
   function setFieldError(slug, msg) {
     const el = form.querySelector(`.error[data-for="${slug}"]`);
     if (el) el.textContent = msg || '';
+    // mark the parent field as having an error so we can style it
+    const field = el?.closest('.field') ||
+                  form.querySelector(`[name="${slug}"]`)?.closest('.field') ||
+                  form.querySelector(`#cf-${slug}`)?.closest('.field') ||
+                  form.querySelector(`[data-slug="${slug}"]`)?.closest('.field');
+    if (field) field.classList.toggle('has-error', !!msg);
+  }
+
+  // clear field error + form banner the moment the user starts fixing the field
+  // (event-delegated so it also catches dynamically rendered intake fields)
+  if (form) {
+    const clearOn = (e) => {
+      const el = e.target;
+      if (!el || !el.matches('input, select, textarea')) return;
+      const name = el.name || (el.id || '').replace(/^(b-|cf-)/, '');
+      if (name) setFieldError(name, '');
+      clearFormBanner();
+    };
+    form.addEventListener('input', clearOn);
+    form.addEventListener('change', clearOn);
   }
 
   function validate() {
@@ -467,6 +487,7 @@
 
     submitBtn.disabled = true;
     submitBtn.classList.add('is-loading');
+    clearFormBanner();
 
     try {
       const result = await api('/api/book', {
@@ -484,8 +505,87 @@
     } catch (err) {
       submitBtn.disabled = false;
       submitBtn.classList.remove('is-loading');
-      alert(err.message || 'Booking failed. Please try another time.');
+      handleSubmitError(err);
     }
+  }
+
+  /* -------- error surfacing (replaces alert popups) -------- */
+
+  // Map of Cal API field names -> our local field slug + friendly message + element
+  const CAL_FIELD_MAP = {
+    attendeePhoneNumber: { slug: 'phone', friendly: 'Please enter a valid phone number we can reach you at.' },
+    phone:               { slug: 'phone', friendly: 'Please enter a valid phone number.' },
+    email:               { slug: 'email', friendly: 'Please enter a valid email.' },
+    name:                { slug: 'name',  friendly: 'Please enter your name.' },
+    // custom intake field slugs come back as-is
+  };
+
+  function clearFormBanner() {
+    const b = $('#form-banner');
+    if (b) { b.hidden = true; b.textContent = ''; }
+  }
+
+  function showFormBanner(msg) {
+    let b = $('#form-banner');
+    if (!b) {
+      b = document.createElement('div');
+      b.id = 'form-banner';
+      b.className = 'form-banner';
+      b.setAttribute('role', 'alert');
+      // place at the top of the confirm form
+      form.insertBefore(b, form.firstChild);
+    }
+    b.textContent = msg;
+    b.hidden = false;
+  }
+
+  /** Parse an API error and route it to the appropriate field, or to the form banner. */
+  function handleSubmitError(err) {
+    const raw = (err && err.message) ? String(err.message) : 'Booking failed. Please try another time.';
+
+    // Cal's responses errors come back like "responses - {attendeePhoneNumber}invalid_number,"
+    // — extract the bracketed field name.
+    const fieldMatch = raw.match(/\{([\w-]+)\}/);
+    if (fieldMatch) {
+      const calField = fieldMatch[1];
+      const reasonRaw = raw.split('}').pop().replace(/[,;\s]+$/, '').trim();
+      const mapped = CAL_FIELD_MAP[calField] || { slug: calField, friendly: null };
+      const friendly = mapped.friendly || prettyReason(reasonRaw) || raw;
+      const slug = mapped.slug;
+
+      setFieldError(slug, friendly);
+
+      // focus the field
+      const target = form.querySelector(
+        `#b-${slug}, input[name="${slug}"], select[name="${slug}"], textarea[name="${slug}"]`,
+      );
+      if (target) {
+        try { target.focus({ preventScroll: false }); } catch { target.focus(); }
+        target.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'center' });
+      }
+      return;
+    }
+
+    // Slot-was-taken style errors
+    if (/no_available_users|already booked|no availability|slot/i.test(raw)) {
+      showFormBanner('That time was just taken. Please pick another slot.');
+      // optional: auto-bounce back to picker after a beat
+      setTimeout(() => { showPanel(panelPick); }, 1600);
+      return;
+    }
+
+    // Fall back to a banner at the top of the form so it's not a popup
+    showFormBanner(raw);
+  }
+
+  /** Turn cryptic Cal reasons into plain English. */
+  function prettyReason(reason) {
+    if (!reason) return null;
+    const r = reason.toLowerCase();
+    if (r.includes('invalid_number')) return 'Please enter a valid phone number.';
+    if (r.includes('invalid_format')) return 'That value doesn\'t look right — please double-check the format.';
+    if (r.includes('required')) return 'This field is required.';
+    return null;
   }
 
   async function showSuccess(booking) {

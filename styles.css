@@ -808,7 +808,33 @@ h3 { font-size: 1.2rem; font-weight: 600; }
 }
 .field textarea { resize: vertical; min-height: 100px; font-family: inherit; }
 .field .error {
-  display: block; color: #c44; font-size: .82rem; margin-top: 6px; min-height: 1em;
+  display: block; color: #c44b5e; font-size: .82rem; margin-top: 6px; min-height: 1em;
+  transition: color .2s;
+}
+
+/* error state — the field has a server- or client-side error */
+.field.has-error input,
+.field.has-error select,
+.field.has-error textarea {
+  border-color: #d77485;
+  background: #fdf6f7;
+}
+.field.has-error input:focus,
+.field.has-error select:focus,
+.field.has-error textarea:focus {
+  border-color: #c44b5e;
+  box-shadow: 0 0 0 4px rgba(196, 75, 94, .14);
+}
+.field.has-error .radio-pill {
+  border-color: #e2a9b3;
+}
+.field.has-error .radio-pill:has(input:checked) {
+  border-color: #c44b5e;
+  background: #c44b5e;
+}
+.field.has-error .error {
+  color: #b03b50;
+  font-weight: 500;
 }
 .field .count { font-size: .78rem; color: var(--text-3); text-align: right; margin-top: 4px; }
 .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
@@ -1012,6 +1038,38 @@ h3 { font-size: 1.2rem; font-weight: 600; }
   color: #8a2a37;
   border-radius: 10px;
   font-size: .95rem;
+}
+
+/* inline error banner shown at the top of the confirm form */
+.form-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 13px 16px;
+  margin: 0 0 18px;
+  background: #fbeef0;
+  border: 1px solid #f1c6cd;
+  color: #8a2a37;
+  border-radius: 10px;
+  font-size: .92rem;
+  line-height: 1.45;
+  animation: banner-in .35s cubic-bezier(.22, .85, .22, 1);
+}
+.form-banner::before {
+  content: "!";
+  flex: 0 0 auto;
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: #c44b5e;
+  color: #fff;
+  font-weight: 700;
+  font-size: .78rem;
+  display: grid; place-items: center;
+  margin-top: 1px;
+}
+@keyframes banner-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 /* calendar loading state */
