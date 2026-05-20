@@ -1,284 +1,549 @@
+// Wisteria Counseling — custom booking flow
+// Talks to /api/event-type, /api/slots, /api/book (Cloudflare Pages Functions
+// that proxy to Cal.com). No API key in client code.
+
 (() => {
-  // year stamp
+  // ---------- year stamp ----------
   const yr = document.getElementById('yr');
   if (yr) yr.textContent = new Date().getFullYear();
 
-  // ----- state -----
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  // ---------- timezone ----------
+  const tz = (() => {
+    try { return Intl.DateTimeFormat().resolvedOptions().timeZone; }
+    catch { return 'America/New_York'; }
+  })();
+
+  // ---------- state ----------
+  const today = startOfDay(new Date());
   let viewYear = today.getFullYear();
-  let viewMonth = today.getMonth(); // 0-indexed
-  let selectedDate = null; // Date object
-  let selectedTime = null; // "HH:MM"
+  let viewMonth = today.getMonth();          // 0-indexed
+  let eventType = null;                      // { title, lengthInMinutes, customFields, ... }
+  let monthSlots = {};                       // { "YYYY-MM-DD": [{ startISO }] }
+  let selectedDateKey = null;                // "YYYY-MM-DD"
+  let selectedSlot = null;                   // { startISO }
 
-  // synthetic schedule: weekdays only, varying availability.
-  // For each future weekday in view, pick a deterministic subset of slots.
-  // Closed: Sat (6), Sun (0). Also closed: random "full" days for realism.
-  const ALL_SLOTS = [
-    '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
-    '13:00', '13:30', '14:00', '14:30', '15:00', '15:30', '16:00', '16:30'
-  ];
+  // ---------- elements ----------
+  const $ = (sel) => document.querySelector(sel);
+  const stage = $('#booking-stage');
+  const panelPick = $('#panel-pick');
+  const errorBox = $('#booking-error');
+  const monthLabel = $('#cal-month');
+  const grid = $('#cal-grid');
+  const prevBtn = $('#prev-month');
+  const nextBtn = $('#next-month');
+  const timesTitle = $('#times-title');
+  const timesDate = $('#times-date');
+  const timesBody = $('#times-body');
+  const confirmPanel = $('#confirm-panel');
+  const confirmWhen = $('#confirm-when');
+  const form = $('#confirm-form');
+  const customFieldsHost = $('#custom-fields');
+  const nameInput = $('#b-name');
+  const emailInput = $('#b-email');
+  const phoneInput = $('#b-phone');
+  const backBtn = $('#back-to-times');
+  const submitBtn = $('#confirm-submit');
+  const successPanel = $('#booking-success');
+  const successEmail = $('#success-email');
+  const successWhen = $('#success-when');
+  const successType = $('#success-type');
+  const successTz = $('#success-tz');
+  const successRef = $('#success-ref');
+  const tzLabel = $('#cal-tz');
 
-  // deterministic pseudo-random based on date: same date always returns same slots.
-  const slotsForDate = (d) => {
-    const dow = d.getDay();
-    if (dow === 0 || dow === 6) return []; // closed weekends
-    const fri = dow === 5;
-    // seed from yyyymmdd
-    const seed = d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
-    const rand = (n) => ((seed * 9301 + n * 49297) % 233280) / 233280;
-    if (rand(0) < 0.18) return []; // ~18% of days are "full"
-    return ALL_SLOTS.filter((_, i) => {
-      // Fridays end at 1pm
-      const hour = parseInt(ALL_SLOTS[i].slice(0, 2), 10);
-      if (fri && hour >= 13) return false;
-      return rand(i + 1) > 0.45;
+  // ---------- panel transition ----------
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const ENTER_MS = prefersReducedMotion ? 0 : 460;
+  const LEAVE_MS = prefersReducedMotion ? 0 : 240;
+  let _transitioning = false;
+
+  const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+
+  async function showPanel(targetEl) {
+    if (_transitioning) return;
+    if (!stage || !targetEl) return;
+    const current = stage.querySelector(':scope > .stage-panel.is-active');
+    if (current === targetEl) return;
+
+    _transitioning = true;
+
+    // measure before any changes
+    const startH = stage.offsetHeight;
+    if (startH) stage.style.minHeight = startH + 'px';
+
+    // exit current
+    if (current) {
+      current.classList.remove('is-active', 'is-revealed');
+      current.classList.add('is-leaving');
+      await wait(LEAVE_MS);
+      current.classList.remove('is-leaving');
+      current.hidden = true;
+    }
+
+    // bring in target
+    targetEl.hidden = false;
+    targetEl.classList.add('is-entering');
+    // force reflow so the panel's natural height is measurable
+    void targetEl.offsetHeight;
+    const endH = targetEl.offsetHeight;
+
+    if (endH && startH && Math.abs(endH - startH) > 4) {
+      stage.style.transition = 'min-height 460ms cubic-bezier(.22,.8,.22,1)';
+      stage.style.minHeight = endH + 'px';
+    }
+
+    await wait(ENTER_MS);
+
+    targetEl.classList.remove('is-entering');
+    targetEl.classList.add('is-active');
+
+    // inner stagger for panels that opt in
+    requestAnimationFrame(() => targetEl.classList.add('is-revealed'));
+
+    // release the height lock after the height transition settles
+    setTimeout(() => {
+      stage.style.transition = '';
+      stage.style.minHeight = '';
+    }, 480);
+
+    _transitioning = false;
+  }
+
+  function scrollStageIntoViewIfNeeded() {
+    if (!stage) return;
+    const rect = stage.getBoundingClientRect();
+    if (rect.top < 0 || rect.top > innerHeight * 0.55) {
+      stage.scrollIntoView({ block: 'start', behavior: prefersReducedMotion ? 'auto' : 'smooth' });
+    }
+  }
+
+  // ---------- API ----------
+  async function api(path, opts = {}) {
+    const res = await fetch(path, {
+      ...opts,
+      headers: { 'Content-Type': 'application/json', ...(opts.headers || {}) },
     });
-  };
+    let body = null;
+    try { body = await res.json(); } catch { /* leave null */ }
+    if (!res.ok || (body && body.ok === false)) {
+      const msg = body?.error?.message || `Request failed (${res.status})`;
+      throw new Error(msg);
+    }
+    return body;
+  }
 
-  const fmtMonth = (y, m) =>
-    new Date(y, m, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  function fetchEventType() {
+    return api('/api/event-type').then((r) => r.eventType);
+  }
 
-  const fmtFullDate = (d) =>
-    d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+  function fetchMonthSlots(year, month) {
+    // Cal slots are tz-grouped — pass our local tz so the grouping matches what
+    // we'll display. start/end strings are date-only; the function appends time.
+    const start = ymd(new Date(year, month, 1));
+    const end = ymd(new Date(year, month + 1, 0));
+    return api(`/api/slots?start=${start}&end=${end}&timeZone=${encodeURIComponent(tz)}`)
+      .then((r) => r.slots || {});
+  }
 
-  const fmtTime = (t) => {
-    const [h, m] = t.split(':').map(Number);
-    const ampm = h >= 12 ? 'PM' : 'AM';
-    const hh = h % 12 === 0 ? 12 : h % 12;
-    return `${hh}:${m.toString().padStart(2, '0')} ${ampm}`;
-  };
+  // ---------- date utils ----------
+  function startOfDay(d) { const x = new Date(d); x.setHours(0, 0, 0, 0); return x; }
+  function ymd(d) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+  function monthLabelText(y, m) {
+    return new Date(y, m, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  }
+  function dateFullLabel(dateKey) {
+    const [y, m, d] = dateKey.split('-').map(Number);
+    return new Date(y, m - 1, d).toLocaleDateString('en-US', {
+      weekday: 'long', month: 'long', day: 'numeric', year: 'numeric',
+    });
+  }
+  function timeLabel(iso) {
+    return new Date(iso).toLocaleTimeString('en-US', {
+      hour: 'numeric', minute: '2-digit', hour12: true, timeZone: tz,
+    });
+  }
+  function tzShortLabel() {
+    try {
+      const parts = new Intl.DateTimeFormat('en-US', {
+        timeZone: tz, timeZoneName: 'short',
+      }).formatToParts(new Date());
+      const tzPart = parts.find((p) => p.type === 'timeZoneName');
+      return tzPart ? tzPart.value : tz;
+    } catch {
+      return tz;
+    }
+  }
 
-  // ----- calendar render -----
-  const monthLabel = document.getElementById('cal-month');
-  const grid = document.getElementById('cal-grid');
-  const prevBtn = document.getElementById('prev-month');
-  const nextBtn = document.getElementById('next-month');
-
-  const renderCalendar = () => {
-    monthLabel.textContent = fmtMonth(viewYear, viewMonth);
+  // ---------- render: calendar ----------
+  function renderCalendar() {
+    monthLabel.textContent = monthLabelText(viewYear, viewMonth);
     grid.innerHTML = '';
 
-    const firstDay = new Date(viewYear, viewMonth, 1).getDay();
+    const firstOfMonth = new Date(viewYear, viewMonth, 1);
+    const firstWeekday = firstOfMonth.getDay();   // 0=Sun
     const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
 
     // leading blanks
-    for (let i = 0; i < firstDay; i++) {
-      const blank = document.createElement('div');
+    for (let i = 0; i < firstWeekday; i++) {
+      const blank = document.createElement('button');
+      blank.type = 'button';
       blank.className = 'day empty';
+      blank.disabled = true;
+      blank.setAttribute('aria-hidden', 'true');
       grid.appendChild(blank);
     }
 
     for (let d = 1; d <= daysInMonth; d++) {
       const date = new Date(viewYear, viewMonth, d);
-      date.setHours(0, 0, 0, 0);
-
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'day';
-      btn.textContent = d;
-
+      const key = ymd(date);
+      const slots = monthSlots[key] || [];
       const isPast = date < today;
-      const slots = slotsForDate(date);
-      const hasSlots = slots.length > 0;
       const isToday = date.getTime() === today.getTime();
+      const hasSlots = slots.length > 0;
 
-      if (isToday) btn.classList.add('today');
+      const cell = document.createElement('button');
+      cell.type = 'button';
+      cell.className = 'day';
+      cell.textContent = String(d);
+      cell.setAttribute('data-date', key);
+      cell.setAttribute('role', 'gridcell');
+      if (isToday) cell.classList.add('today');
+      if (isPast) cell.classList.add('past');
+      if (hasSlots) cell.classList.add('has-slots');
+      else cell.classList.add('no-slots');
 
-      if (isPast) {
-        btn.classList.add('past');
-        btn.disabled = true;
-      } else if (!hasSlots) {
-        btn.classList.add('no-slots');
-        btn.disabled = true;
-        btn.setAttribute('aria-label', `${date.toDateString()}, no availability`);
+      if (isPast || !hasSlots) {
+        cell.disabled = true;
+        cell.setAttribute('aria-label', `${dateFullLabel(key)} — no availability`);
       } else {
-        btn.classList.add('has-slots');
-        btn.setAttribute('aria-label', `${date.toDateString()}, ${slots.length} times available`);
-        btn.addEventListener('click', () => selectDate(date));
+        cell.setAttribute('aria-label', `${dateFullLabel(key)} — ${slots.length} time${slots.length === 1 ? '' : 's'} available`);
+        if (key === selectedDateKey) cell.classList.add('selected');
+        cell.addEventListener('click', () => onDateClick(key));
       }
-
-      if (selectedDate && date.getTime() === selectedDate.getTime()) {
-        btn.classList.add('selected');
-      }
-
-      grid.appendChild(btn);
+      grid.appendChild(cell);
     }
 
-    // disable prev if we're at this month
-    const atMin = viewYear === today.getFullYear() && viewMonth === today.getMonth();
-    prevBtn.disabled = atMin;
-  };
+    // disable prev when viewing current month
+    const showingCurrent = viewYear === today.getFullYear() && viewMonth === today.getMonth();
+    prevBtn.disabled = showingCurrent;
+  }
 
-  // ----- time slots render -----
-  const timesTitle = document.getElementById('times-title');
-  const timesDate = document.getElementById('times-date');
-  const timesBody = document.getElementById('times-body');
-
-  const renderTimes = () => {
-    if (!selectedDate) {
+  // ---------- render: times ----------
+  function renderTimes() {
+    if (!selectedDateKey) {
+      timesTitle.textContent = 'Available times';
       timesDate.textContent = 'Select a date to see open times.';
       timesBody.innerHTML = '<div class="times-empty">No date selected yet.</div>';
       return;
     }
-    timesDate.textContent = fmtFullDate(selectedDate);
-    const slots = slotsForDate(selectedDate);
+    timesTitle.textContent = dateFullLabel(selectedDateKey).split(',').slice(0, 1).join(','); // "Monday"
+    const fullParts = dateFullLabel(selectedDateKey).split(',');
+    timesDate.textContent = fullParts.slice(1).join(',').trim() + ` · ${tzShortLabel()}`;
+
+    const slots = monthSlots[selectedDateKey] || [];
     if (slots.length === 0) {
-      timesBody.innerHTML = '<div class="times-empty">No openings on this day.</div>';
+      timesBody.innerHTML = '<div class="times-empty">No open times on this day.</div>';
       return;
     }
 
-    const morning = slots.filter(s => parseInt(s, 10) < 12);
-    const afternoon = slots.filter(s => parseInt(s, 10) >= 12);
+    timesBody.innerHTML = '';
+    const group = document.createElement('div');
+    group.className = 'time-group';
+    const list = document.createElement('div');
+    list.className = 'time-slots';
+    for (const slot of slots) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'slot';
+      btn.textContent = timeLabel(slot.start);
+      btn.addEventListener('click', () => onTimeClick(slot));
+      list.appendChild(btn);
+    }
+    group.appendChild(list);
+    timesBody.appendChild(group);
+  }
 
-    const group = (label, list) => {
-      if (!list.length) return '';
-      return `
-        <div class="time-group">
-          <p>${label}</p>
-          <div class="time-slots">
-            ${list.map(t => `<button type="button" class="slot${selectedTime === t ? ' selected' : ''}" data-time="${t}">${fmtTime(t)}</button>`).join('')}
-          </div>
-        </div>
-      `;
-    };
+  // ---------- render: custom intake fields ----------
+  function renderCustomFields() {
+    if (!eventType || !customFieldsHost) return;
+    customFieldsHost.innerHTML = '';
+    for (const f of eventType.customFields || []) {
+      const wrap = document.createElement('div');
+      wrap.className = 'field field-full';
+      const labelEl = document.createElement('label');
+      labelEl.textContent = f.label + (f.required ? '' : ' ');
+      if (!f.required) {
+        const muted = document.createElement('span');
+        muted.className = 'muted';
+        muted.textContent = ' (optional)';
+        labelEl.appendChild(muted);
+      }
 
-    timesBody.innerHTML = group('Morning', morning) + group('Afternoon', afternoon);
+      if (f.type === 'radio' && Array.isArray(f.options)) {
+        const fid = `cf-${f.slug}`;
+        labelEl.setAttribute('id', `${fid}-lbl`);
+        wrap.appendChild(labelEl);
+        const group = document.createElement('div');
+        group.className = 'radio-row';
+        group.setAttribute('role', 'radiogroup');
+        group.setAttribute('aria-labelledby', `${fid}-lbl`);
+        if (f.required) group.dataset.required = 'true';
+        group.dataset.slug = f.slug;
+        for (const opt of f.options) {
+          const optLabel = typeof opt === 'string' ? opt : (opt.label || opt.value || '');
+          const optValue = typeof opt === 'string' ? opt : (opt.value || opt.label || '');
+          const id = `${fid}-${optValue.toLowerCase().replace(/\s+/g, '-')}`;
+          const radioWrap = document.createElement('label');
+          radioWrap.className = 'radio-pill';
+          radioWrap.setAttribute('for', id);
+          const input = document.createElement('input');
+          input.type = 'radio';
+          input.name = f.slug;
+          input.id = id;
+          input.value = optValue;
+          if (f.required) input.required = true;
+          radioWrap.appendChild(input);
+          const span = document.createElement('span');
+          span.textContent = optLabel;
+          radioWrap.appendChild(span);
+          group.appendChild(radioWrap);
+        }
+        wrap.appendChild(group);
+      } else if (f.type === 'text' || f.type === 'textarea') {
+        const id = `cf-${f.slug}`;
+        labelEl.setAttribute('for', id);
+        wrap.appendChild(labelEl);
+        const el = document.createElement(f.type === 'textarea' ? 'textarea' : 'input');
+        if (el.tagName === 'INPUT') el.type = 'text';
+        el.id = id;
+        el.name = f.slug;
+        if (f.placeholder) el.placeholder = f.placeholder;
+        if (f.required) el.required = true;
+        el.maxLength = f.type === 'textarea' ? 500 : 120;
+        wrap.appendChild(el);
+      } else {
+        // fallback: text input
+        const id = `cf-${f.slug}`;
+        labelEl.setAttribute('for', id);
+        wrap.appendChild(labelEl);
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.id = id;
+        input.name = f.slug;
+        if (f.required) input.required = true;
+        wrap.appendChild(input);
+      }
 
-    timesBody.querySelectorAll('.slot').forEach(btn => {
-      btn.addEventListener('click', () => selectTime(btn.dataset.time));
-    });
-  };
+      const err = document.createElement('small');
+      err.className = 'error';
+      err.dataset.for = f.slug;
+      wrap.appendChild(err);
+      customFieldsHost.appendChild(wrap);
+    }
+  }
 
-  // ----- step indicators -----
-  const setStep = (n) => {
-    [1, 2, 3].forEach(i => {
-      const el = document.getElementById('step-' + i);
-      el.classList.remove('active', 'done');
-      if (i < n) el.classList.add('done');
-      if (i === n) el.classList.add('active');
-    });
-  };
-
-  // ----- selection handlers -----
-  const selectDate = (d) => {
-    selectedDate = d;
-    selectedTime = null;
+  // ---------- handlers ----------
+  function onDateClick(key) {
+    selectedDateKey = key;
     renderCalendar();
     renderTimes();
-    setStep(2);
-    // close the confirm panel if it was open
-    document.getElementById('confirm-panel').hidden = true;
-    // scroll times panel into view on mobile
-    if (window.innerWidth < 860) {
-      document.querySelector('.times-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  };
+  }
 
-  const selectTime = (t) => {
-    selectedTime = t;
+  function onTimeClick(slot) {
+    selectedSlot = slot;
+    const label = `${dateFullLabel(selectedDateKey)} at ${timeLabel(slot.start)} (${tzShortLabel()})`;
+    confirmWhen.textContent = label;
+    scrollStageIntoViewIfNeeded();
+    showPanel(confirmPanel);
+  }
+
+  async function onMonthNav(dir) {
+    const newDate = new Date(viewYear, viewMonth + dir, 1);
+    const cap = new Date(today.getFullYear(), today.getMonth(), 1);
+    if (newDate < cap) return;
+    viewYear = newDate.getFullYear();
+    viewMonth = newDate.getMonth();
+    selectedDateKey = null;
     renderTimes();
-    openConfirm();
-    setStep(3);
-  };
 
-  // ----- confirm panel -----
-  const confirmPanel = document.getElementById('confirm-panel');
-  const confirmWhen = document.getElementById('confirm-when');
-  const confirmForm = document.getElementById('confirm-form');
-  const backBtn = document.getElementById('back-to-times');
+    // direction-aware slide for the calendar grid
+    grid.classList.remove('is-flying-in', 'is-flying-out', 'is-flying-out-right', 'is-flying-out-left');
+    grid.classList.add(dir > 0 ? 'is-flying-out-left' : 'is-flying-out-right');
+    if (!prefersReducedMotion) await wait(180);
 
-  const openConfirm = () => {
-    confirmWhen.textContent = `${fmtFullDate(selectedDate)} · ${fmtTime(selectedTime)}`;
-    confirmPanel.hidden = false;
-    confirmPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
+    grid.innerHTML = '<div class="cal-loading">Loading availability…</div>';
+    grid.classList.remove('is-flying-out-left', 'is-flying-out-right');
+    grid.classList.add(dir > 0 ? 'is-flying-in-right' : 'is-flying-in-left');
 
-  backBtn.addEventListener('click', () => {
-    confirmPanel.hidden = true;
-    selectedTime = null;
-    renderTimes();
-    setStep(2);
-    document.querySelector('.times-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
-  });
+    try {
+      monthSlots = await fetchMonthSlots(viewYear, viewMonth);
+      renderCalendar();
+      // ensure entering class still applied after innerHTML replacement
+      grid.classList.add(dir > 0 ? 'is-flying-in-right' : 'is-flying-in-left');
+      requestAnimationFrame(() => {
+        grid.classList.remove('is-flying-in-right', 'is-flying-in-left');
+      });
+    } catch (e) { showError(e); }
+  }
 
-  // phone formatting
-  const bPhone = document.getElementById('b-phone');
-  bPhone.addEventListener('input', () => {
-    const d = bPhone.value.replace(/\D/g, '').slice(0, 10);
-    if (d.length === 0) { bPhone.value = ''; return; }
-    if (d.length < 4) bPhone.value = d;
-    else if (d.length < 7) bPhone.value = `(${d.slice(0,3)}) ${d.slice(3)}`;
-    else bPhone.value = `(${d.slice(0,3)}) ${d.slice(3,6)}-${d.slice(6)}`;
-  });
+  function onBackToTimes() {
+    scrollStageIntoViewIfNeeded();
+    showPanel(panelPick);
+  }
 
-  const setErr = (name, text) => {
-    const el = confirmForm.querySelector(`[data-for="${name}"]`);
-    if (el) el.textContent = text || '';
-  };
+  function setFieldError(slug, msg) {
+    const el = form.querySelector(`.error[data-for="${slug}"]`);
+    if (el) el.textContent = msg || '';
+  }
 
-  const validateConfirm = () => {
+  function validate() {
     let ok = true;
-    const data = new FormData(confirmForm);
+    setFieldError('name', '');
+    setFieldError('email', '');
+    setFieldError('phone', '');
 
-    if (!(data.get('name') || '').toString().trim()) { setErr('name', 'Please enter your name.'); ok = false; } else setErr('name', '');
-    if (!(data.get('dob') || '')) { setErr('dob', 'Please enter your date of birth.'); ok = false; } else setErr('dob', '');
+    const name = nameInput.value.trim();
+    if (!name) { setFieldError('name', 'Please enter your name.'); ok = false; }
 
-    const email = (data.get('email') || '').toString().trim();
-    if (!email) { setErr('email', 'Please enter your email.'); ok = false; }
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setErr('email', 'Please enter a valid email.'); ok = false; }
-    else setErr('email', '');
+    const email = emailInput.value.trim();
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setFieldError('email', 'Please enter a valid email.');
+      ok = false;
+    }
 
-    const phone = (data.get('phone') || '').toString().replace(/\D/g, '');
-    if (phone.length !== 10) { setErr('phone', 'Please enter a 10-digit phone number.'); ok = false; } else setErr('phone', '');
+    const ph = phoneInput.value.replace(/\D/g, '');
+    if (ph && ph.length !== 10) {
+      setFieldError('phone', 'Please enter a 10-digit phone number.');
+      ok = false;
+    }
 
+    // custom fields
+    for (const f of eventType?.customFields || []) {
+      setFieldError(f.slug, '');
+      if (!f.required) continue;
+      if (f.type === 'radio') {
+        const checked = form.querySelector(`input[name="${f.slug}"]:checked`);
+        if (!checked) { setFieldError(f.slug, 'Please choose one.'); ok = false; }
+      } else {
+        const el = form.querySelector(`[name="${f.slug}"]`);
+        if (!el || !el.value.trim()) {
+          setFieldError(f.slug, 'Required.');
+          ok = false;
+        }
+      }
+    }
     return ok;
-  };
+  }
 
-  confirmForm.addEventListener('submit', (e) => {
+  async function onSubmit(e) {
     e.preventDefault();
-    if (confirmForm.querySelector('[name="website"]').value) return;
-    if (!validateConfirm()) {
-      const first = confirmForm.querySelector('.error:not(:empty)');
-      if (first) {
-        const f = first.closest('.field').querySelector('input, select, textarea');
-        if (f) f.focus();
+    if (form.querySelector('[name="website"]').value) return; // honeypot
+
+    if (!validate()) {
+      const firstErr = form.querySelector('.error:not(:empty)');
+      if (firstErr) {
+        const field = firstErr.closest('.field')?.querySelector('input, textarea, select');
+        if (field) field.focus();
       }
       return;
     }
 
-    // build a fake reference id: APT-YYYYMMDD-NNN
-    const d = selectedDate;
-    const stamp = `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
-    const n = String(Math.floor(Math.random() * 900) + 100);
-    const ref = `APT-${stamp}-${n}`;
+    const phone = phoneInput.value.replace(/\D/g, '');
+    const responses = {};
+    for (const f of eventType.customFields || []) {
+      if (f.type === 'radio') {
+        const checked = form.querySelector(`input[name="${f.slug}"]:checked`);
+        if (checked) responses[f.slug] = checked.value;
+      } else {
+        const el = form.querySelector(`[name="${f.slug}"]`);
+        if (el && el.value.trim()) responses[f.slug] = el.value.trim();
+      }
+    }
 
-    document.getElementById('booking-app').hidden = true;
-    document.querySelector('.steps').hidden = true;
-    const success = document.getElementById('booking-success');
-    document.getElementById('success-email').textContent = confirmForm.email.value;
-    document.getElementById('success-when').textContent = `${fmtFullDate(selectedDate)} at ${fmtTime(selectedTime)}`;
-    document.getElementById('success-type').textContent = confirmForm.type.value;
-    document.getElementById('success-format').textContent = confirmForm.format.value;
-    document.getElementById('success-ref').textContent = `Reference: ${ref}`;
-    success.hidden = false;
-    success.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  });
+    submitBtn.disabled = true;
+    submitBtn.classList.add('is-loading');
 
-  // ----- month nav -----
-  prevBtn.addEventListener('click', () => {
-    if (prevBtn.disabled) return;
-    viewMonth--;
-    if (viewMonth < 0) { viewMonth = 11; viewYear--; }
-    renderCalendar();
-  });
-  nextBtn.addEventListener('click', () => {
-    viewMonth++;
-    if (viewMonth > 11) { viewMonth = 0; viewYear++; }
-    renderCalendar();
-  });
+    try {
+      const result = await api('/api/book', {
+        method: 'POST',
+        body: JSON.stringify({
+          start: selectedSlot.start,
+          name: nameInput.value.trim(),
+          email: emailInput.value.trim().toLowerCase(),
+          phone: phone ? `+1${phone}` : '',
+          timeZone: tz,
+          responses,
+        }),
+      });
+      showSuccess(result.booking);
+    } catch (err) {
+      submitBtn.disabled = false;
+      submitBtn.classList.remove('is-loading');
+      alert(err.message || 'Booking failed. Please try another time.');
+    }
+  }
 
-  // initial
-  renderCalendar();
-  renderTimes();
+  async function showSuccess(booking) {
+    // populate success copy
+    successEmail.textContent = emailInput.value.trim().toLowerCase();
+    successWhen.textContent = `${dateFullLabel(selectedDateKey)} · ${timeLabel(booking.start || selectedSlot.start)}`;
+    if (successTz) successTz.textContent = tzShortLabel();
+    if (successType) successType.textContent = `${eventType.title} · ${eventType.lengthInMinutes} min · Telehealth`;
+    if (successRef) successRef.textContent = booking.uid || '—';
+
+    scrollStageIntoViewIfNeeded();
+    await showPanel(successPanel);
+
+    // reset submit button state so if the user comes back via "book another", it's clean
+    submitBtn.disabled = false;
+    submitBtn.classList.remove('is-loading');
+  }
+
+  function showError(err) {
+    if (!errorBox) return;
+    errorBox.hidden = false;
+    errorBox.textContent = err?.message || 'Something went wrong loading availability.';
+  }
+
+  // ---------- phone formatting ----------
+  if (phoneInput) {
+    phoneInput.addEventListener('input', () => {
+      const d = phoneInput.value.replace(/\D/g, '').slice(0, 10);
+      if (d.length === 0) { phoneInput.value = ''; return; }
+      if (d.length < 4) phoneInput.value = d;
+      else if (d.length < 7) phoneInput.value = `(${d.slice(0, 3)}) ${d.slice(3)}`;
+      else phoneInput.value = `(${d.slice(0, 3)}) ${d.slice(3, 6)}-${d.slice(6)}`;
+    });
+  }
+
+  // ---------- wire up + boot ----------
+  prevBtn.addEventListener('click', () => onMonthNav(-1));
+  nextBtn.addEventListener('click', () => onMonthNav(1));
+  backBtn.addEventListener('click', onBackToTimes);
+  form.addEventListener('submit', onSubmit);
+  if (tzLabel) tzLabel.textContent = tzShortLabel();
+
+  async function boot() {
+    try {
+      eventType = await fetchEventType();
+      const t = $('#booking-event-title');
+      if (t) t.textContent = `${eventType.title} · ${eventType.lengthInMinutes} min`;
+      renderCustomFields();
+      monthSlots = await fetchMonthSlots(viewYear, viewMonth);
+      renderCalendar();
+      renderTimes();
+      stage.hidden = false;
+      // bring the calendar panel in via the same transition pipeline as later swaps
+      await showPanel(panelPick);
+    } catch (err) {
+      showError(err);
+    }
+  }
+
+  boot();
 })();

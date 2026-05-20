@@ -1,0 +1,7 @@
+name = "wisteria-counseling"
+compatibility_date = "2024-09-23"
+pages_build_output_dir = "."
+
+# Local secrets live in .dev.vars (gitignored).
+# In production, set CAL_API_KEY via the Cloudflare Pages dashboard:
+#   Workers & Pages → wisteria-counseling → Settings → Environment variables

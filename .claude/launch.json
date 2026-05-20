@@ -2,10 +2,16 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "site",
+      "name": "psychiatrist",
       "runtimeExecutable": "python",
       "runtimeArgs": ["-m", "http.server", "5173"],
       "port": 5173
+    },
+    {
+      "name": "psychiatrist-api",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["scripts/dev_server.py"],
+      "port": 5174
     }
   ]
 }

@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" />
-  <link rel="stylesheet" href="styles.css?v=2" />
+  <link rel="stylesheet" href="styles.css?v=8" />
 </head>
 <body>
   <a class="skip" href="#cal-panel">Skip to calendar</a>
@@ -46,18 +46,138 @@
     <header class="booking-hero">
       <p class="kicker">Schedule a session</p>
       <h1>Find a time <em class="serif-i">that works for you.</em></h1>
-      <p class="booking-lede">Pick from real-time availability synced to Saudia's calendar. You'll get an instant confirmation and a brief intake follows by email.</p>
+      <p class="booking-lede">Pick from real-time availability. You'll get an email confirmation right away, and a brief intake follows separately.</p>
+      <p class="booking-event-tag" id="booking-event-title">Initial consultation · 50 min</p>
     </header>
 
-    <!-- BOOKING EMBED: the star -->
-    <section class="cal-section" aria-label="Appointment booking">
-      <div class="cal-frame">
-        <div id="cal-inline"></div>
+    <div class="booking-error" id="booking-error" hidden role="alert"></div>
+
+    <div id="booking-stage" class="booking-stage" hidden>
+      <!-- panel 1: pick a date & time -->
+      <div class="stage-panel panel-pick" id="panel-pick" hidden>
+        <div class="booking-grid">
+          <section class="cal-panel" id="cal-panel" aria-label="Calendar">
+            <div class="cal-header">
+              <h2 id="cal-month">…</h2>
+              <div class="cal-nav">
+                <button type="button" id="prev-month" aria-label="Previous month">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                </button>
+                <button type="button" id="next-month" aria-label="Next month">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="cal-dow" aria-hidden="true">
+              <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+            </div>
+
+            <div class="cal-grid" id="cal-grid" role="grid" aria-label="Available appointment dates"></div>
+
+            <div class="cal-legend">
+              <span><span class="dot"></span> Available</span>
+              <span><span class="dot busy"></span> Full / closed</span>
+              <span>Visits offered Mon–Fri</span>
+            </div>
+          </section>
+
+          <aside class="times-panel" aria-label="Available times">
+            <h3 id="times-title">Available times</h3>
+            <p class="selected-date" id="times-date">Select a date to see open times.</p>
+            <div id="times-body">
+              <div class="times-empty">No date selected yet.</div>
+            </div>
+          </aside>
+        </div>
       </div>
-      <p class="cal-fallback">
-        Calendar not loading? <a href="https://cal.com/juan-diaz-d8yrgf/30min" target="_blank" rel="noopener">Open it in a new tab</a>.
-      </p>
-    </section>
+
+      <!-- panel 2: confirm your details -->
+      <section class="stage-panel confirm-panel" id="confirm-panel" hidden>
+        <div class="confirm-head">
+          <p class="kicker">You're almost there</p>
+          <h3>Confirm your appointment</h3>
+          <div class="confirm-when" id="confirm-when">…</div>
+        </div>
+
+        <form id="confirm-form" novalidate>
+          <div class="confirm-grid">
+            <div class="field">
+              <label for="b-name">Full name</label>
+              <input id="b-name" name="name" type="text" required maxlength="80" autocomplete="name" />
+              <small class="error" data-for="name"></small>
+            </div>
+            <div class="field">
+              <label for="b-email">Email</label>
+              <input id="b-email" name="email" type="email" required maxlength="120" autocomplete="email" />
+              <small class="error" data-for="email"></small>
+            </div>
+            <div class="field field-full">
+              <label for="b-phone">Phone <span class="muted">(optional)</span></label>
+              <input id="b-phone" name="phone" type="tel" maxlength="20" autocomplete="tel" placeholder="(555) 555-5555" />
+              <small class="error" data-for="phone"></small>
+            </div>
+
+            <!-- intake questions rendered from /api/event-type -->
+            <div id="custom-fields" class="custom-fields-host"></div>
+          </div>
+
+          <input type="text" name="website" tabindex="-1" autocomplete="off" class="hp" aria-hidden="true" />
+
+          <div class="confirm-actions">
+            <button type="button" class="btn btn-ghost" id="back-to-times" style="color: var(--text); border-color: var(--border);">← Change time</button>
+            <button type="submit" id="confirm-submit" class="btn btn-primary btn-lg">
+              <span class="btn-label">Confirm appointment</span>
+              <span class="btn-spinner" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="20" height="20"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-dasharray="42 16"/></svg>
+              </span>
+            </button>
+          </div>
+
+          <p class="form-note" style="margin-top: 18px;">Submitting this form books the time and sends an email confirmation. A separate, secure intake will follow before your first session. Please don't share clinical details here. Not for emergencies — in crisis, call <strong>988</strong>.</p>
+        </form>
+      </section>
+
+      <!-- panel 3: success -->
+      <div class="stage-panel booking-success" id="booking-success" hidden>
+        <!-- thin gradient ribbon at top of card -->
+        <span class="success-ribbon" aria-hidden="true"></span>
+
+        <div class="success-inner">
+          <div class="reveal-item success-mark" aria-hidden="true">
+            <span class="success-halo"></span>
+            <svg viewBox="0 0 80 80" width="80" height="80">
+              <circle class="success-circle" cx="40" cy="40" r="36" fill="none" stroke-width="2.2"/>
+              <path class="success-check" d="M25 41 L36 52 L57 30" fill="none" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+
+          <p class="reveal-item kicker">Appointment requested</p>
+          <h2 class="reveal-item success-title">Look out for an email <em class="serif-i">from us soon.</em></h2>
+          <p class="reveal-item success-lede">A confirmation is on its way to <strong id="success-email">…</strong>. A short, secure intake will follow before your first session.</p>
+
+          <div class="reveal-item summary" role="group" aria-label="Appointment details">
+            <div class="summary-row">
+              <span class="summary-label">When</span>
+              <span class="summary-value"><strong id="success-when">…</strong> <span id="success-tz" class="summary-tz">…</span></span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">What</span>
+              <span class="summary-value" id="success-type">…</span>
+            </div>
+            <div class="summary-row summary-ref">
+              <span class="summary-label">Reference</span>
+              <span class="summary-value mono" id="success-ref">—</span>
+            </div>
+          </div>
+
+          <div class="reveal-item success-actions">
+            <a class="btn btn-primary btn-lg" href="index.html">Return home</a>
+            <a class="btn btn-ghost" href="booking.html" style="color: var(--text); border-color: var(--border);">Book another session</a>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- AFTER YOU BOOK: 4-step horizontal card row -->
     <section class="next-steps" aria-label="What happens after you book">
@@ -73,8 +193,8 @@
         </li>
         <li>
           <span class="step-num">02</span>
-          <strong>Quick intake</strong>
-          <p>A short form follows by email with insurance and what's bringing you in.</p>
+          <strong>Secure intake</strong>
+          <p>A short, secure intake follows by email — that's where insurance and what's bringing you in is collected.</p>
         </li>
         <li>
           <span class="step-num">03</span>
@@ -96,191 +216,6 @@
         <figcaption>Saudia J. Rahim, MHC</figcaption>
       </figure>
     </aside>
-
-    <!-- Cal.com inline embed -->
-    <script type="text/javascript">
-      (function (C, A, L) {
-        let p = function (a, ar) { a.q.push(ar); };
-        let d = C.document;
-        C.Cal = C.Cal || function () {
-          let cal = C.Cal;
-          let ar = arguments;
-          if (!cal.loaded) {
-            cal.ns = {};
-            cal.q = cal.q || [];
-            d.head.appendChild(d.createElement("script")).src = A;
-            cal.loaded = true;
-          }
-          if (ar[0] === L) {
-            const api = function () { p(api, arguments); };
-            const namespace = ar[1];
-            api.q = api.q || [];
-            if (typeof namespace === "string") {
-              cal.ns[namespace] = cal.ns[namespace] || api;
-              p(cal.ns[namespace], ar);
-              p(cal, ["initNamespace", namespace]);
-            } else p(cal, ar);
-            return;
-          }
-          p(cal, ar);
-        };
-      })(window, "https://app.cal.com/embed/embed.js", "init");
-
-      Cal("init", "session", { origin: "https://cal.com" });
-
-      Cal.ns.session("inline", {
-        elementOrSelector: "#cal-inline",
-        config: { layout: "month_view" },
-        calLink: "juan-diaz-d8yrgf/30min",
-      });
-
-      Cal.ns.session("ui", {
-        theme: "light",
-        hideBranding: true,
-        cssVarsPerTheme: {
-          light: {
-            "cal-brand": "#7B5FA1",
-            "cal-brand-emphasis": "#5A3F80",
-            "cal-brand-text": "#ffffff",
-            "cal-bg": "#ffffff",
-            "cal-bg-emphasis": "#EDE5F4",
-            "cal-bg-muted": "#faf7fc",
-            "cal-bg-subtle": "#f0e9f4",
-            "cal-bg-info": "#EDE5F4",
-            "cal-text": "#1f1429",
-            "cal-text-emphasis": "#1f1429",
-            "cal-text-muted": "#54485f",
-            "cal-text-subtle": "#847a8f",
-            "cal-border": "#e6dfeb",
-            "cal-border-default": "#e6dfeb",
-            "cal-border-emphasis": "#7B5FA1",
-            "cal-border-subtle": "#f0e9f4",
-            "cal-border-muted": "#f0e9f4",
-            "cal-font-cal": "'Fraunces', Georgia, serif",
-            "cal-font-body": "'Inter', system-ui, sans-serif"
-          }
-        },
-        hideEventTypeDetails: false,
-        layout: "month_view"
-      });
-    </script>
-
-    <div id="booking-app" hidden>
-      <div class="booking-grid">
-        <section class="cal-panel" id="cal-panel" aria-label="Calendar">
-          <div class="cal-header">
-            <h2 id="cal-month">…</h2>
-            <div class="cal-nav">
-              <button type="button" id="prev-month" aria-label="Previous month">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-              </button>
-              <button type="button" id="next-month" aria-label="Next month">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-              </button>
-            </div>
-          </div>
-
-          <div class="cal-dow" aria-hidden="true">
-            <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
-          </div>
-
-          <div class="cal-grid" id="cal-grid" role="grid" aria-label="Available appointment dates"></div>
-
-          <div class="cal-legend">
-            <span><span class="dot"></span> Available</span>
-            <span><span class="dot busy"></span> Full / closed</span>
-            <span>Visits offered Mon–Fri</span>
-          </div>
-        </section>
-
-        <aside class="times-panel" aria-label="Available times">
-          <h3 id="times-title">Available times</h3>
-          <p class="selected-date" id="times-date">Select a date to see open times.</p>
-          <div id="times-body">
-            <div class="times-empty">No date selected yet.</div>
-          </div>
-        </aside>
-      </div>
-
-      <section class="confirm-panel" id="confirm-panel" hidden>
-        <div class="confirm-head">
-          <h3>Confirm your appointment</h3>
-          <div class="confirm-when" id="confirm-when">…</div>
-        </div>
-
-        <form id="confirm-form" novalidate>
-          <div class="confirm-grid">
-            <div class="field">
-              <label for="b-name">Full name</label>
-              <input id="b-name" name="name" type="text" required maxlength="80" autocomplete="name" />
-              <small class="error" data-for="name"></small>
-            </div>
-            <div class="field">
-              <label for="b-dob">Date of birth</label>
-              <input id="b-dob" name="dob" type="date" required />
-              <small class="error" data-for="dob"></small>
-            </div>
-            <div class="field">
-              <label for="b-email">Email</label>
-              <input id="b-email" name="email" type="email" required maxlength="120" autocomplete="email" />
-              <small class="error" data-for="email"></small>
-            </div>
-            <div class="field">
-              <label for="b-phone">Phone</label>
-              <input id="b-phone" name="phone" type="tel" required maxlength="20" autocomplete="tel" placeholder="(555) 555-5555" />
-              <small class="error" data-for="phone"></small>
-            </div>
-            <div class="field">
-              <label for="b-type">Session type</label>
-              <select id="b-type" name="type">
-                <option>Initial consultation (50 min)</option>
-                <option>Returning client, individual session (50 min)</option>
-                <option>Parent / family consult (50 min)</option>
-              </select>
-            </div>
-            <div class="field">
-              <label for="b-format">Format</label>
-              <select id="b-format" name="format">
-                <option>Telehealth (New York residents)</option>
-                <option>In-person (by arrangement)</option>
-              </select>
-            </div>
-            <div class="field field-full">
-              <label for="b-insurance">Insurance <span class="muted">(optional)</span></label>
-              <input id="b-insurance" name="insurance" type="text" maxlength="80" placeholder="e.g. Blue Cross Blue Shield, member ID 12345" />
-            </div>
-            <div class="field field-full">
-              <label for="b-notes">Anything you'd like the office to know? <span class="muted">(optional)</span></label>
-              <textarea id="b-notes" name="notes" maxlength="500" rows="3" placeholder="Briefly. You don't need to share clinical details here."></textarea>
-            </div>
-          </div>
-
-          <input type="text" name="website" tabindex="-1" autocomplete="off" class="hp" aria-hidden="true" />
-
-          <div class="confirm-actions">
-            <button type="button" class="btn btn-ghost" id="back-to-times" style="color: var(--text); border-color: var(--border);">← Change time</button>
-            <button type="submit" class="btn btn-primary btn-lg">Confirm appointment</button>
-          </div>
-
-          <p class="form-note" style="margin-top: 18px;">Submitting this form requests an appointment. The office will email a confirmation within one business day. Not for emergencies. In crisis, call <strong>988</strong>.</p>
-        </form>
-      </section>
-    </div>
-
-    <div class="booking-success" id="booking-success" hidden>
-      <div class="success-mark" aria-hidden="true">✓</div>
-      <h2 style="font-family: 'Fraunces', serif;">Appointment requested</h2>
-      <p style="color: var(--text-2);">Thank you. A confirmation email is on its way to <strong id="success-email">…</strong>.</p>
-
-      <div class="summary">
-        <p><strong id="success-when">…</strong></p>
-        <p id="success-type">…</p>
-        <p id="success-format">…</p>
-        <p class="ref" id="success-ref">…</p>
-      </div>
-
-      <a class="btn btn-primary" href="index.html">Return home</a>
-    </div>
   </main>
 
   <footer class="footer">
@@ -289,6 +224,6 @@
     </div>
   </footer>
 
-  <script src="booking.js?v=1" defer></script>
+  <script src="booking.js?v=3" defer></script>
 </body>
 </html>

@@ -1,0 +1,38 @@
+{
+  "triggerEvent": "BOOKING_CREATED",
+  "createdAt": "2026-05-20T18:30:00.000Z",
+  "payload": {
+    "type": "Initial consultation",
+    "title": "Initial consultation between Saudia and Test Client",
+    "additionalNotes": null,
+    "customInputs": {},
+    "startTime": "2026-05-21T14:00:00.000Z",
+    "endTime": "2026-05-21T14:50:00.000Z",
+    "organizer": {
+      "id": 2471012,
+      "name": "Saudia J. Rahim",
+      "email": "juandiaz5673@gmail.com",
+      "username": "juan-diaz-d8yrgf",
+      "timeZone": "America/New_York",
+      "language": { "locale": "en" }
+    },
+    "responses": {
+      "name": { "value": "Test Client", "isHidden": false },
+      "email": { "value": "juandiaz5673@gmail.com", "isHidden": false },
+      "ny-resident": { "value": "Yes", "isHidden": false },
+      "session-format": { "value": "Telehealth", "isHidden": false }
+    },
+    "attendees": [{
+      "email": "juandiaz5673@gmail.com",
+      "name": "Test Client",
+      "timeZone": "America/New_York",
+      "language": { "locale": "en" }
+    }],
+    "location": "https://app.cal.com/video/fake-meeting-id",
+    "uid": "TESTBOOKING_LOCAL_SAMPLE",
+    "eventTypeId": 5752260,
+    "bookingId": 0,
+    "metadata": {},
+    "status": "ACCEPTED"
+  }
+}
