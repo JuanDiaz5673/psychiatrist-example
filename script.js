@@ -20,32 +20,41 @@
     revealers.forEach(el => io.observe(el));
   }
 
-  // mobile menu (dropdown)
+  // mobile menu (dropdown with open/close transitions)
   const ham = document.getElementById('hamburger');
   const menu = document.getElementById('mobile-menu');
   if (ham && menu) {
+    // remove the `hidden` attribute so CSS controls visibility via .is-open
+    menu.hidden = false;
+    menu.setAttribute('aria-hidden', 'true');
+
+    const isOpen = () => menu.classList.contains('is-open');
     const close = () => {
-      menu.hidden = true;
+      menu.classList.remove('is-open');
       ham.setAttribute('aria-expanded', 'false');
+      menu.setAttribute('aria-hidden', 'true');
+    };
+    const open = () => {
+      menu.classList.add('is-open');
+      ham.setAttribute('aria-expanded', 'true');
+      menu.setAttribute('aria-hidden', 'false');
     };
     ham.addEventListener('click', (e) => {
       e.stopPropagation();
-      const open = menu.hidden;
-      menu.hidden = !open;
-      ham.setAttribute('aria-expanded', String(open));
+      isOpen() ? close() : open();
     });
     menu.addEventListener('click', (e) => {
       if (e.target.tagName === 'A') close();
       else e.stopPropagation();
     });
     document.addEventListener('click', () => {
-      if (!menu.hidden) close();
+      if (isOpen()) close();
     });
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && !menu.hidden) close();
+      if (e.key === 'Escape' && isOpen()) close();
     });
     window.addEventListener('resize', () => {
-      if (window.innerWidth > 860 && !menu.hidden) close();
+      if (window.innerWidth > 860 && isOpen()) close();
     });
   }
 

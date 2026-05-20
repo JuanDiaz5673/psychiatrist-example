@@ -185,9 +185,25 @@ h3 { font-size: 1.2rem; font-weight: 600; }
   box-shadow: 0 18px 40px rgba(30, 20, 50, .15);
   min-width: 220px;
   transform-origin: top right;
-  animation: menuDrop .22s var(--ease);
+
+  /* closed state */
+  opacity: 0;
+  visibility: hidden;
+  transform: scale(.92) translateY(-10px);
+  transition:
+    opacity .2s var(--ease),
+    transform .28s cubic-bezier(.4, 0, .2, 1),
+    visibility 0s linear .28s;
 }
-.mobile-menu[hidden] { display: none; }
+.mobile-menu.is-open {
+  opacity: 1;
+  visibility: visible;
+  transform: scale(1) translateY(0);
+  transition:
+    opacity .22s var(--ease) .04s,
+    transform .35s cubic-bezier(.2, 1.2, .4, 1),
+    visibility 0s linear 0s;
+}
 .mobile-menu a {
   padding: 10px 14px; border-radius: 8px;
   color: var(--text); font-size: .98rem; font-weight: 500;
@@ -202,10 +218,6 @@ h3 { font-size: 1.2rem; font-weight: 600; }
 }
 .mobile-menu .btn-primary,
 .mobile-menu .btn-primary:hover { color: #fff; }
-@keyframes menuDrop {
-  from { opacity: 0; transform: scale(.96) translateY(-6px); }
-  to   { opacity: 1; transform: scale(1) translateY(0); }
-}
 
 @media (max-width: 860px) {
   .nav, .topbar-cta { display: none; }
