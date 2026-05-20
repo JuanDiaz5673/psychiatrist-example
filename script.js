@@ -141,6 +141,32 @@
     });
   }
 
+  // parallax on My Approach spotlight image
+  const spotlight = document.querySelector('.spotlight');
+  const spotlightPhoto = document.querySelector('.spotlight-photo');
+  if (spotlight && spotlightPhoto && !reduce) {
+    const updateParallax = () => {
+      const rect = spotlight.getBoundingClientRect();
+      // skip when section is offscreen
+      if (rect.bottom < -100 || rect.top > window.innerHeight + 100) return;
+      // distance from viewport center to section center, scaled
+      const sectionCenter = rect.top + rect.height / 2;
+      const viewportCenter = window.innerHeight / 2;
+      const offset = (sectionCenter - viewportCenter) * 0.25;
+      spotlightPhoto.style.transform = `translate3d(0, ${-offset}px, 0)`;
+    };
+    let ticking = false;
+    const onScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(() => { updateParallax(); ticking = false; });
+        ticking = true;
+      }
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    updateParallax();
+  }
+
   // insurance "view more" toggle: dynamic visible count based on column count
   const insToggle = document.getElementById('ins-toggle');
   const insGrid = document.getElementById('ins-grid');
