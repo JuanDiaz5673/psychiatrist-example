@@ -176,7 +176,7 @@ h3 { font-size: 1.2rem; font-weight: 600; }
 }
 
 .mobile-menu {
-  position: fixed; top: 68px; right: 16px;
+  position: fixed; top: 68px; right: 8px;
   background: var(--bg); padding: 10px;
   display: flex; flex-direction: column; gap: 2px;
   z-index: 99;
