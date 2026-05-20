@@ -228,15 +228,20 @@ h3 { font-size: 1.2rem; font-weight: 600; }
 .hero {
   position: relative;
   min-height: 78vh;
+  overflow: hidden;
   display: grid; align-items: center;
   overflow: hidden;
   color: #fff;
   isolation: isolate;
 }
 .hero-photo {
-  position: absolute; inset: 0;
-  width: 100%; height: 100%; object-fit: cover;
+  position: absolute;
+  /* extended bounds so the parallax translate doesn't reveal gaps */
+  top: -12%; left: 0; right: 0; bottom: -12%;
+  width: 100%; height: 124%; object-fit: cover;
   z-index: -2;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
   filter: saturate(1.3) contrast(1.05);
 }
 .hero-overlay {
@@ -358,27 +363,6 @@ h3 { font-size: 1.2rem; font-weight: 600; }
   0%, 100% { box-shadow: 0 0 0 4px rgba(123, 95, 161, .18); }
   50%      { box-shadow: 0 0 0 8px rgba(123, 95, 161, .05); }
 }
-
-/* ---------- marquee ticker ---------- */
-.ticker {
-  background: var(--dark); color: rgba(255,255,255,.7);
-  overflow: hidden; white-space: nowrap;
-  border-top: 1px solid rgba(255,255,255,.06);
-  border-bottom: 1px solid rgba(255,255,255,.06);
-}
-.ticker-track {
-  display: inline-flex; gap: 56px;
-  padding: 14px 28px;
-  animation: ticker 38s linear infinite;
-  font-size: .82rem; letter-spacing: .18em; text-transform: uppercase;
-}
-.ticker-track span { display: inline-flex; align-items: center; gap: 56px; }
-.ticker-track .sep { color: var(--teal); }
-@keyframes ticker {
-  from { transform: translateX(0); }
-  to   { transform: translateX(-50%); }
-}
-.ticker:hover .ticker-track { animation-play-state: paused; }
 
 /* ---------- section ornament divider ---------- */
 .ornament {
