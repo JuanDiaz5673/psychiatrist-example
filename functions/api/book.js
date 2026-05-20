@@ -12,7 +12,9 @@
 
 import { calPost, EVENT_TYPE_ID, DEFAULT_TIMEZONE, json, handler, HttpError } from "./_shared.js";
 
-const ISO_INSTANT = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z$/;
+// Cal returns slot start times in whatever timezone we requested, so the
+// suffix may be either `Z` (UTC) or a numeric offset like `-04:00`. Accept both.
+const ISO_DATETIME = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,3})?(Z|[+\-]\d{2}:?\d{2})$/;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export const onRequestPost = handler(async ({ env, request }) => {
@@ -23,16 +25,24 @@ export const onRequestPost = handler(async ({ env, request }) => {
     throw new HttpError(400, "request body must be JSON");
   }
 
-  const start = body?.start;
+  const rawStart = body?.start;
   const name = (body?.name || "").toString().trim();
   const email = (body?.email || "").toString().trim().toLowerCase();
   const phone = (body?.phone || "").toString().trim();
   const timeZone = (body?.timeZone || DEFAULT_TIMEZONE).toString();
   const responses = body?.responses && typeof body.responses === "object" ? body.responses : {};
 
-  if (!start || !ISO_INSTANT.test(start)) {
-    throw new HttpError(400, "start must be an ISO 8601 UTC instant (e.g. 2026-05-25T14:00:00.000Z)");
+  if (!rawStart || typeof rawStart !== "string" || !ISO_DATETIME.test(rawStart)) {
+    throw new HttpError(400, "start must be an ISO 8601 datetime (UTC Z or numeric offset)");
   }
+  // Normalize to UTC `.000Z` form before sending to Cal — it accepts either,
+  // but normalizing keeps a single canonical representation in our records.
+  const parsed = new Date(rawStart);
+  if (Number.isNaN(parsed.getTime())) {
+    throw new HttpError(400, "start did not parse as a valid datetime");
+  }
+  const start = parsed.toISOString();
+
   if (!name) throw new HttpError(400, "name is required");
   if (!email || !EMAIL_RE.test(email)) throw new HttpError(400, "valid email required");
 
