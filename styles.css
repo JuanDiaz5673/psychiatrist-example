@@ -230,7 +230,6 @@ h3 { font-size: 1.2rem; font-weight: 600; }
   min-height: 78vh;
   overflow: hidden;
   display: grid; align-items: center;
-  overflow: hidden;
   color: #fff;
   isolation: isolate;
 }
@@ -247,8 +246,8 @@ h3 { font-size: 1.2rem; font-weight: 600; }
 .hero-overlay {
   position: absolute; inset: 0; z-index: -1;
   background:
-    linear-gradient(120deg, rgba(26,20,34,.7) 0%, rgba(26,20,34,.4) 50%, rgba(26,20,34,.15) 100%),
-    linear-gradient(180deg, rgba(26,20,34,.1), rgba(26,20,34,.5));
+    linear-gradient(120deg, rgba(26,20,34,.82) 0%, rgba(26,20,34,.55) 50%, rgba(26,20,34,.3) 100%),
+    linear-gradient(180deg, rgba(26,20,34,.15), rgba(26,20,34,.6));
 }
 .hero-inner {
   max-width: var(--maxw); margin: 0 auto; padding: 96px 24px;
