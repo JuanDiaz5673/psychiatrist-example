@@ -34,27 +34,138 @@
     </div>
   </header>
 
+  <div class="notice" role="status">
+    <div class="wrap notice-inner">
+      <span class="notice-dot" aria-hidden="true"></span>
+      <p><strong>Submit a query</strong> · Waitlist positions available. The office will reach out when an opening matches your needs.</p>
+    </div>
+  </div>
+
   <main class="booking-wrap">
-    <div class="notice" role="status" style="margin: -48px -24px 32px; border-radius: 0;">
-      <div class="wrap notice-inner">
-        <span class="notice-dot" aria-hidden="true"></span>
-        <p><strong>Submit a query</strong> · Waitlist positions available. The office will reach out when an opening matches your needs.</p>
+    <!-- HERO: centered focusing moment -->
+    <header class="booking-hero">
+      <p class="kicker">Schedule a session</p>
+      <h1>Find a time <em class="serif-i">that works for you.</em></h1>
+      <p class="booking-lede">Pick from real-time availability synced to Saudia's calendar. You'll get an instant confirmation and a brief intake follows by email.</p>
+    </header>
+
+    <!-- BOOKING EMBED: the star -->
+    <section class="cal-section" aria-label="Appointment booking">
+      <div class="cal-frame">
+        <div id="cal-inline"></div>
       </div>
-    </div>
+      <p class="cal-fallback">
+        Calendar not loading? <a href="https://cal.com/juan-diaz-d8yrgf/30min" target="_blank" rel="noopener">Open it in a new tab</a>.
+      </p>
+    </section>
 
-    <div class="booking-head">
-      <p class="kicker">Request an appointment</p>
-      <h1>Find a time that works for you.</h1>
-      <p>Pick a preferred date, then choose a time. You'll confirm your details on the next step. Individual sessions are 50 minutes.</p>
-    </div>
+    <!-- AFTER YOU BOOK: 4-step horizontal card row -->
+    <section class="next-steps" aria-label="What happens after you book">
+      <header class="next-steps-head">
+        <p class="kicker">After you book</p>
+        <h2>What to expect</h2>
+      </header>
+      <ol class="steps-grid">
+        <li>
+          <span class="step-num">01</span>
+          <strong>Pick a time</strong>
+          <p>Choose any open slot above. Individual sessions are 50 minutes.</p>
+        </li>
+        <li>
+          <span class="step-num">02</span>
+          <strong>Quick intake</strong>
+          <p>A short form follows by email with insurance and what's bringing you in.</p>
+        </li>
+        <li>
+          <span class="step-num">03</span>
+          <strong>Confirmation</strong>
+          <p>You'll receive a calendar invite with the video link or office details.</p>
+        </li>
+        <li>
+          <span class="step-num">04</span>
+          <strong>First session</strong>
+          <p>A relaxed conversation. No pressure to share more than you're ready to.</p>
+        </li>
+      </ol>
+    </section>
 
-    <ol class="steps" aria-label="Steps">
-      <li class="step active" id="step-1">Pick a date</li>
-      <li class="step" id="step-2">Pick a time</li>
-      <li class="step" id="step-3">Confirm</li>
-    </ol>
+    <!-- CLOSING QUOTE -->
+    <aside class="booking-quote">
+      <figure>
+        <blockquote>"Therapy isn't a sales pitch. The first session is mostly about whether we're a good fit."</blockquote>
+        <figcaption>Saudia J. Rahim, MHC</figcaption>
+      </figure>
+    </aside>
 
-    <div id="booking-app">
+    <!-- Cal.com inline embed -->
+    <script type="text/javascript">
+      (function (C, A, L) {
+        let p = function (a, ar) { a.q.push(ar); };
+        let d = C.document;
+        C.Cal = C.Cal || function () {
+          let cal = C.Cal;
+          let ar = arguments;
+          if (!cal.loaded) {
+            cal.ns = {};
+            cal.q = cal.q || [];
+            d.head.appendChild(d.createElement("script")).src = A;
+            cal.loaded = true;
+          }
+          if (ar[0] === L) {
+            const api = function () { p(api, arguments); };
+            const namespace = ar[1];
+            api.q = api.q || [];
+            if (typeof namespace === "string") {
+              cal.ns[namespace] = cal.ns[namespace] || api;
+              p(cal.ns[namespace], ar);
+              p(cal, ["initNamespace", namespace]);
+            } else p(cal, ar);
+            return;
+          }
+          p(cal, ar);
+        };
+      })(window, "https://app.cal.com/embed/embed.js", "init");
+
+      Cal("init", "session", { origin: "https://cal.com" });
+
+      Cal.ns.session("inline", {
+        elementOrSelector: "#cal-inline",
+        config: { layout: "month_view" },
+        calLink: "juan-diaz-d8yrgf/30min",
+      });
+
+      Cal.ns.session("ui", {
+        theme: "light",
+        hideBranding: true,
+        cssVarsPerTheme: {
+          light: {
+            "cal-brand": "#7B5FA1",
+            "cal-brand-emphasis": "#5A3F80",
+            "cal-brand-text": "#ffffff",
+            "cal-bg": "#ffffff",
+            "cal-bg-emphasis": "#EDE5F4",
+            "cal-bg-muted": "#faf7fc",
+            "cal-bg-subtle": "#f0e9f4",
+            "cal-bg-info": "#EDE5F4",
+            "cal-text": "#1f1429",
+            "cal-text-emphasis": "#1f1429",
+            "cal-text-muted": "#54485f",
+            "cal-text-subtle": "#847a8f",
+            "cal-border": "#e6dfeb",
+            "cal-border-default": "#e6dfeb",
+            "cal-border-emphasis": "#7B5FA1",
+            "cal-border-subtle": "#f0e9f4",
+            "cal-border-muted": "#f0e9f4",
+            "cal-font-cal": "'Fraunces', Georgia, serif",
+            "cal-font-body": "'Inter', system-ui, sans-serif"
+          }
+        },
+        hideEventTypeDetails: false,
+        layout: "month_view"
+      });
+    </script>
+
+    <div id="booking-app" hidden>
       <div class="booking-grid">
         <section class="cal-panel" id="cal-panel" aria-label="Calendar">
           <div class="cal-header">
