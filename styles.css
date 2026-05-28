@@ -657,8 +657,38 @@ h3 { font-size: 1.2rem; font-weight: 600; }
 }
 .featured-svc-meta p {
   color: var(--text-2);
-  margin: 0 0 18px;
+  margin: 0 0 14px;
   font-size: 1rem;
+  line-height: 1.6;
+}
+.featured-svc-sub {
+  font-size: .95rem !important;
+  color: var(--text-3) !important;
+  font-style: italic;
+  margin: 0 0 18px !important;
+}
+.featured-svc-note-soft {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 18px 0 0;
+  padding-top: 16px;
+  border-top: 1px dashed var(--border);
+  font-size: .82rem;
+  color: var(--text-3);
+  line-height: 1.55;
+}
+.featured-svc-note-soft::before {
+  content: "";
+  flex: 0 0 14px;
+  width: 14px; height: 14px;
+  margin-top: 2px;
+  border-radius: 50%;
+  background: var(--leaf-l, #d8e6cf);
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237c9e6c' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='20 6 9 17 4 12'/></svg>");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 10px 10px;
 }
 .featured-svc-facts {
   list-style: none; padding: 0; margin: 0;
